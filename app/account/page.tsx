@@ -1,3 +1,4 @@
+"use client";
 import Header from "@/components/Header";
 export default function Account() {
  return <><Header/><main className="container max-w-lg py-12"><div className="card p-6"><h1 className="text-2xl font-black">ورود به حساب کاربری</h1><p className="mt-2 text-sm leading-7 text-muted">برای مدیریت آگهی‌ها و پیام‌ها، شماره موبایل خود را وارد کنید. ورود پیامکی در مرحله اتصال بک‌اند فعال خواهد شد.</p><label className="mt-6 block text-sm font-bold">شماره موبایل<input className="field mt-2" dir="ltr" placeholder="0912xxxxxxx"/></label><button className="btn btn-primary mt-4 w-full" onClick={()=>alert("ورود پیامکی هنوز به سرویس OTP متصل نشده است.")}>دریافت کد تأیید</button></div></main></>;
