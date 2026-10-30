@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "بازار | خرید و فروش آسان",
-  description: "بازار آنلاین آگهی‌های خرید و فروش در سراسر ایران"
+  title: "سه‌سوته | هرچی می‌خوای، سه‌سوته!",
+  description: "بازار آنلاین مردم ایران؛ خرید و فروش آسان آگهی‌ها در سراسر کشور"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
