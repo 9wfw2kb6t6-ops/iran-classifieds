@@ -8,8 +8,8 @@ export const listings: Listing[] = [
   { id: 6, title: "مبل راحتی هفت نفره", price: "۲۲٬۰۰۰٬۰۰۰ تومان", city: "رشت، گلسار", category: "خانه و آشپزخانه", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80", time: "۴ ساعت پیش", description: "پارچه سالم و بدون پارگی، فروش به علت تغییر دکور." }
 ];
 export const categories = [
-  { name: "املاک", icon: "⌂", count: "۱۲٬۴۰۰ آگهی" }, { name: "خودرو", icon: "▰", count: "۸٬۲۰۰ آگهی" },
-  { name: "موبایل و دیجیتال", icon: "▯", count: "۱۵٬۶۰۰ آگهی" }, { name: "خانه و آشپزخانه", icon: "▤", count: "۹٬۱۰۰ آگهی" },
-  { name: "استخدام و کاریابی", icon: "▣", count: "۳٬۳۰۰ آگهی" }, { name: "خدمات", icon: "⚒", count: "۵٬۷۰۰ آگهی" },
-  { name: "وسایل شخصی", icon: "◇", count: "۶٬۴۰۰ آگهی" }, { name: "ورزش و سرگرمی", icon: "◎", count: "۲٬۱۰۰ آگهی" }
+  { name: "املاک", icon: "house", count: "۱۲٬۴۰۰ آگهی" }, { name: "خودرو", icon: "car", count: "۸٬۲۰۰ آگهی" },
+  { name: "موبایل و دیجیتال", icon: "smartphone", count: "۱۵٬۶۰۰ آگهی" }, { name: "خانه و آشپزخانه", icon: "sofa", count: "۹٬۱۰۰ آگهی" },
+  { name: "استخدام و کاریابی", icon: "briefcase", count: "۳٬۳۰۰ آگهی" }, { name: "خدمات", icon: "wrench", count: "۵٬۷۰۰ آگهی" },
+  { name: "وسایل شخصی", icon: "shirt", count: "۶٬۴۰۰ آگهی" }, { name: "ورزش و سرگرمی", icon: "dumbbell", count: "۲٬۱۰۰ آگهی" }
 ];
