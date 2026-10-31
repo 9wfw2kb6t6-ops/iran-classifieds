@@ -11,7 +11,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const businessName = String(body.business_name || "").trim().slice(0, 160);
-    const phone = String(body.contact_phone || "").replace(/[\\s-]/g, "");
+    const rawPhone = String(body.contact_phone || "");
+    const phone = rawPhone
+      .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+      .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+      .replace(/[\\s()-]/g, "")
+      .replace(/^\\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
     const model = String(body.store_model || "");
     const plan = String(body.plan_code || "");
     const description = String(body.description || "").trim().slice(0, 3000);
