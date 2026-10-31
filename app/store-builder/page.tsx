@@ -37,9 +37,9 @@ export default function StoreBuilderPage() {
     const normalizedPhone = phone
       .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
       .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
-      .replace(/[\\s()-]/g, "");
-    const iranPhone = normalizedPhone.replace(/^\\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
-    if (!/^09\\d{9}$/.test(iranPhone)) {
+      .replace(/[\s()-]/g, "");
+    const iranPhone = normalizedPhone.replace(/^\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
+    if (!/^09\d{9}$/.test(iranPhone)) {
       setMessage("شماره موبایل را به شکل 09123456789 وارد کن.");
       return;
     }
