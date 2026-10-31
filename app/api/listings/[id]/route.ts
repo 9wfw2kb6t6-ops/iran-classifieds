@@ -2,20 +2,19 @@ import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
 export const dynamic = "force-dynamic";
-
 type Context = { params: { id: string } };
 
 export async function GET(_request: Request, { params }: Context) {
   try {
     const { id } = params;
-    if (!/^\d+$/.test(id) || Number(id) < 1) {
+    if (!/^\\d+$/.test(id) || Number(id) < 1) {
       return NextResponse.json({ error: "شناسه آگهی معتبر نیست." }, { status: 400 });
     }
     const url = process.env.DATABASE_URL;
     if (!url) return NextResponse.json({ error: "پایگاه داده در دسترس نیست." }, { status: 503 });
     const sql = neon(url);
     const rows = await sql`
-      SELECT id, title, description, price_toman, city, category, image_urls, created_at, is_featured
+      SELECT id, title, description, price_toman, city, category, contact_phone, image_urls, created_at, is_featured
       FROM listings
       WHERE id = ${Number(id)} AND status = 'published'
       LIMIT 1
