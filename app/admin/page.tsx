@@ -53,7 +53,7 @@ export default function AdminPage() {
     finally { setLoading(false); }
   }
 
-  async function changeStatus(id: number, status: "published" | "rejected") {
+  async function changeStatus(id: number, status: "published" | "rejected" | "sold" | "expired") {
     setBusy(id); setMessage("");
     try {
       const response = await fetch("/api/admin/listings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status }) });
