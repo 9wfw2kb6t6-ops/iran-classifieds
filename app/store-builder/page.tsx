@@ -34,8 +34,12 @@ export default function StoreBuilderPage() {
       setMessage("لطفاً نام کسب‌وکار را وارد کن.");
       return;
     }
-    const normalizedPhone = phone.replace(/[\\s-]/g, "");
-    if (!/^09\\d{9}$/.test(normalizedPhone)) {
+    const normalizedPhone = phone
+      .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+      .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+      .replace(/[\\s()-]/g, "");
+    const iranPhone = normalizedPhone.replace(/^\\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
+    if (!/^09\\d{9}$/.test(iranPhone)) {
       setMessage("شماره موبایل را به شکل 09123456789 وارد کن.");
       return;
     }
@@ -45,7 +49,7 @@ export default function StoreBuilderPage() {
       const response = await fetch("/api/store-builder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ business_name: business.trim(), contact_phone: normalizedPhone, store_model: kind, plan_code: selected, description: description.trim() })
+        body: JSON.stringify({ business_name: business.trim(), contact_phone: iranPhone, store_model: kind, plan_code: selected, description: description.trim() })
       });
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) {
