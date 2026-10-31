@@ -15,13 +15,23 @@ export default function StoreBuilderPage() {
   const [selected, setSelected] = useState("basic");
   const [kind, setKind] = useState("inside");
   const [business, setBusiness] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState("");
   const [description, setDescription] = useState("");
   const chosen = plans.find(p => p.id === selected)!;
 
-  const submitRequest = () => {
-    const requestText = `درخواست فروشگاه‌ساز سه‌سوته\nنوع فروشگاه: ${chosen.name}\nمدل اجرا: ${kind === "inside" ? "داخل سه‌سوته" : "سایت مستقل"}\nنام کسب‌وکار: ${business}\nتوضیحات: ${description}\nقیمت پایه: ${chosen.price}`;
-    if (navigator.clipboard) navigator.clipboard.writeText(requestText).then(() => alert("متن درخواست کپی شد؛ ثبت مستقیم درخواست را در مرحله بعد فعال می‌کنیم.")).catch(() => alert(requestText));
-    else alert(requestText);
+  const submitRequest = async () => {
+    setSending(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/store-builder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business_name: business, contact_phone: phone, store_model: kind, plan_code: selected, description }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "ثبت درخواست انجام نشد.");
+      setMessage(`درخواست شماره ${data.request.id} با موفقیت ثبت شد. تیم سه‌سوته با شما تماس می‌گیرد.`);
+      setBusiness(""); setPhone(""); setDescription("");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "ثبت درخواست انجام نشد."); }
+    finally { setSending(false); }
   };
 
   return <><Header /><main className="min-h-screen bg-[#fffaf4]">
@@ -46,7 +56,7 @@ export default function StoreBuilderPage() {
     </section>
 
     <section className="container pb-16"><div className="mx-auto max-w-3xl rounded-3xl bg-white p-6 shadow-sm ring-1 ring-[#eee3d7] md:p-9"><div className="flex items-center gap-3"><div className="rounded-2xl bg-[#fff1e7] p-3 text-[#e66d2d]"><Store size={24}/></div><div><h2 className="text-xl font-black text-[#18343c]">درخواست ساخت فروشگاه</h2><p className="mt-1 text-xs text-[#829094]">اطلاعات اولیه را وارد کن تا درخواستت آماده شود.</p></div></div>
-      <div className="mt-6 grid gap-4"><label className="text-sm font-bold text-[#526268]">نام کسب‌وکار<input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="مثلاً پوشاک بهار" className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><label className="text-sm font-bold text-[#526268]">توضیح کوتاه درباره فروشگاه<textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="چه محصولاتی می‌فروشی و چه امکاناتی نیاز داری؟" rows={4} className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><div className="rounded-2xl bg-[#fff8ef] p-4 text-sm leading-7 text-[#526268]">انتخاب فعلی: <b>{chosen.name}</b> · {kind==="inside" ? "فروشگاه داخل سه‌سوته" : "سایت مستقل"} · <b>{chosen.price}</b><p className="mt-1 text-xs text-[#829094]">این مرحله فقط برای آماده‌سازی درخواست است؛ پرداخت آنلاین و ثبت خودکار هنوز فعال نشده است.</p></div><button onClick={submitRequest} disabled={!business.trim()} className="rounded-xl bg-[#f47735] px-5 py-3.5 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-40">کپی اطلاعات درخواست <ArrowLeft className="mr-2 inline" size={16}/></button></div>
+      <div className="mt-6 grid gap-4"><label className="text-sm font-bold text-[#526268]">نام کسب‌وکار<input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="مثلاً پوشاک بهار" className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><label className="text-sm font-bold text-[#526268]">شماره موبایل تماس<input value={phone} onChange={e=>setPhone(e.target.value)} inputMode="numeric" placeholder="09123456789" className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><label className="text-sm font-bold text-[#526268]">توضیح کوتاه درباره فروشگاه<textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="چه محصولاتی می‌فروشی و چه امکاناتی نیاز داری؟" rows={4} className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><div className="rounded-2xl bg-[#fff8ef] p-4 text-sm leading-7 text-[#526268]">انتخاب فعلی: <b>{chosen.name}</b> · {kind==="inside" ? "فروشگاه داخل سه‌سوته" : "سایت مستقل"} · <b>{chosen.price}</b><p className="mt-1 text-xs text-[#829094]">ثبت درخواست رایگان است؛ پس از بررسی، قیمت نهایی و مراحل پرداخت به شما اعلام می‌شود. فعلاً پرداخت آنلاین فعال نیست.</p></div><button onClick={submitRequest} disabled={!business.trim() || !phone.trim() || sending} className="rounded-xl bg-[#f47735] px-5 py-3.5 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-40">{sending ? "در حال ثبت..." : "ثبت درخواست فروشگاه"} <ArrowLeft className="mr-2 inline" size={16}/></button></div>
     </div></section>
   </main><footer className="border-t border-[#eee6dd] bg-white py-7 text-center text-xs text-[#829094]">© سه‌سوته — فروشگاه‌ساز سه‌سوته</footer></>;
 }
