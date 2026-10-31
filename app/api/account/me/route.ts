@@ -10,6 +10,14 @@ export async function GET(request: NextRequest) {
     const sql = neon(process.env.DATABASE_URL!);
     const rows = await sql`SELECT id, phone, display_name, created_at FROM users WHERE id = ${userId} LIMIT 1`;
     if (!rows.length) return NextResponse.json({ user: null });
+    // Recover older listings that were created while the account session was not attached.
+    // Only claim unowned listings whose contact phone exactly matches this account phone.
+    await sql`
+      UPDATE listings
+      SET user_id = ${userId}
+      WHERE user_id IS NULL
+        AND contact_phone = ${rows[0].phone}
+    `;
     const listings = await sql`SELECT id, title, description, price_toman, city, category, contact_phone, status, created_at, image_urls FROM listings WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 100`;
     return NextResponse.json({ user: rows[0], listings });
   } catch (error) {
