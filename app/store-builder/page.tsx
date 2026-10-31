@@ -21,17 +21,32 @@ export default function StoreBuilderPage() {
   const [description, setDescription] = useState("");
   const chosen = plans.find(p => p.id === selected)!;
 
-  const submitRequest = async () => {
+  async function submitRequest() {
     setSending(true);
     setMessage("");
-    try {
-      const response = await fetch("/api/store-builder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ business_name: business, contact_phone: phone, store_model: kind, plan_code: selected, description }) });
+    fetch("/api/store-builder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        business_name: business,
+        contact_phone: phone,
+        store_model: kind,
+        plan_code: selected,
+        description: description
+      })
+    }).then(async function (response) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "ثبت درخواست انجام نشد.");
-      setMessage(`درخواست شماره ${data.request.id} با موفقیت ثبت شد. تیم سه‌سوته با شما تماس می‌گیرد.`);
-      setBusiness(""); setPhone(""); setDescription("");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "ثبت درخواست انجام نشد."); } finally { setSending(false); }
-  };
+      setMessage("درخواست با موفقیت ثبت شد. تیم سه‌سوته با شما تماس می‌گیرد.");
+      setBusiness("");
+      setPhone("");
+      setDescription("");
+    }).catch(function (error) {
+      setMessage(error instanceof Error ? error.message : "ثبت درخواست انجام نشد.");
+    }).then(function () {
+      setSending(false);
+    });
+  }
 
   return <><Header /><main className="min-h-screen bg-[#fffaf4]">
     <section className="container pt-8 md:pt-12"><div className="relative overflow-hidden rounded-[30px] bg-[#18343c] px-6 py-10 text-white md:px-12 md:py-16">
