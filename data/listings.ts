@@ -1,4 +1,4 @@
-export type Listing = { id: number; title: string; price: string; city: string; category: string; image: string; time: string; featured?: boolean; description: string; };
+export type Listing = { id: number; title: string; price: string; city: string; category: string; image: string; time: string; featured?: boolean; bumped?: boolean; description: string; };
 export const listings: Listing[] = [
   { id: 1, title: "آیفون ۱۳ پرو مکس ۲۵۶ گیگ", price: "۳۸٬۵۰۰٬۰۰۰ تومان", city: "تهران، پونک", category: "موبایل و تبلت", image: "https://images.unsplash.com/photo-1632633173522-6d6e3f7f0f8c?auto=format&fit=crop&w=900&q=80", time: "۱۰ دقیقه پیش", featured: true, description: "گوشی تمیز و سالم، بدون خط و خش جدی، همراه جعبه." },
   { id: 2, title: "آپارتمان ۸۵ متری، دو خواب", price: "۶٬۸۰۰٬۰۰۰٬۰۰۰ تومان", city: "کرج، عظیمیه", category: "املاک", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80", time: "۲۵ دقیقه پیش", description: "نورگیر، دارای پارکینگ و آسانسور." },
