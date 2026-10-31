@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS listings (
   category VARCHAR(80) NOT NULL,
   image_urls TEXT[] NOT NULL DEFAULT '{}',
   status VARCHAR(16) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'published', 'rejected', 'sold')),
+    CHECK (status IN ('pending', 'published', 'rejected', 'sold', 'expired')),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
