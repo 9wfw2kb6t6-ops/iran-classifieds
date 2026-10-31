@@ -89,7 +89,7 @@ export default function StoreBuilderPage() {
             <ul className="mt-5 space-y-3">
               {p.features.map(f => <li key={f} className="flex items-start gap-2 text-sm leading-6 text-[#526268]"><CheckCircle2 className="mt-1 shrink-0 text-[#16a36a]" size={16}/>{f}</li>)}
             </ul>
-            <button onClick={() => setSelected(p.id)} className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-black ${selected === p.id ? "bg-[#18343c] text-white" : "bg-[#fff1e7] text-[#d85f24]"}`}>انتخاب این طرح</button>
+            <button onClick={() => setSelected(p.id as "basic" | "pro" | "custom")} className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-black ${selected === p.id ? "bg-[#18343c] text-white" : "bg-[#fff1e7] text-[#d85f24]"}`}>انتخاب این طرح</button>
           </article>
         ))}
       </div>
