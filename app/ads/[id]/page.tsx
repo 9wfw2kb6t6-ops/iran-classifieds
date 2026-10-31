@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/components/Header";
-import { ArrowRight, MapPin, CalendarDays, ShieldCheck, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, MapPin, CalendarDays, ShieldCheck, Image as ImageIcon, Phone, MessageCircle } from "lucide-react";
 
-type Ad = { id: number; title: string; description: string; price_toman: number | string; city: string; category: string; image_urls?: string[]; created_at?: string; is_featured?: boolean };
+type Ad = { id: number; title: string; description: string; price_toman: number | string; city: string; category: string; contact_phone?: string; image_urls?: string[]; created_at?: string; is_featured?: boolean };
 const money = (value: number | string) => Number(value) > 0 ? new Intl.NumberFormat("fa-IR").format(Number(value)) + " تومان" : "توافقی";
 
 export default function AdDetailPage() {
@@ -27,6 +27,7 @@ export default function AdDetailPage() {
   }, [params.id]);
 
   const photos = ad?.image_urls?.length ? ad.image_urls : [];
+  const whatsappPhone = ad?.contact_phone ? "98" + ad.contact_phone.slice(1) : "";
   return <><Header /><main className="container min-h-[65vh] py-6 md:py-10">
     <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand"><ArrowRight size={18}/> بازگشت به آگهی‌ها</Link>
     {loading ? <div className="card p-12 text-center text-sm text-muted">در حال دریافت جزئیات آگهی...</div> :
@@ -50,8 +51,13 @@ export default function AdDetailPage() {
           <div className="flex items-center gap-2"><MapPin size={18} className="text-brand"/>{ad.city}</div>
           <div className="flex items-center gap-2"><CalendarDays size={18} className="text-brand"/>{ad.created_at ? new Intl.DateTimeFormat("fa-IR", { dateStyle: "long" }).format(new Date(ad.created_at)) : "آگهی ثبت‌شده"}</div>
         </div>
+        {ad.contact_phone && <div className="mb-5 space-y-3">
+          <a href={"tel:" + ad.contact_phone} className="btn btn-primary flex w-full items-center justify-center gap-2"><Phone size={18}/> تماس با آگهی‌دهنده</a>
+          <a href={"https://wa.me/" + whatsappPhone} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-800"><MessageCircle size={18}/> پیام در واتساپ</a>
+          <p className="text-center text-xs text-muted" dir="ltr">{ad.contact_phone}</p>
+        </div>}
         <div className="rounded-2xl bg-[#fff8ef] p-4 text-xs leading-7 text-gray-600"><div className="mb-1 flex items-center gap-2 font-bold text-[#18343c]"><ShieldCheck size={17}/> نکته ایمنی سه‌سوته</div>قبل از پرداخت، کالا یا ملک را حضوری بررسی کن و از واریز بیعانه بدون اطمینان خودداری کن.</div>
-        <p className="mt-4 text-center text-xs leading-6 text-muted">اطلاعات تماس آگهی‌دهنده در مرحله بعد به این صفحه اضافه می‌شود.</p>
+        {!ad.contact_phone && <p className="mt-4 text-center text-xs leading-6 text-muted">برای این آگهی شماره تماسی ثبت نشده است.</p>}
       </aside>
     </div>}
   </main></>;
