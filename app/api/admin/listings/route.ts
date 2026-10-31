@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   if (!isAdminSessionValid()) return unauthorized();
   try {
     const status = request.nextUrl.searchParams.get("status") || "pending";
-    if (!["pending", "published"].includes(status)) {
+    if (!["pending", "published", "archive"].includes(status)) {
       return NextResponse.json({ error: "وضعیت درخواستی معتبر نیست." }, { status: 400 });
     }
     const url = process.env.DATABASE_URL;
@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
       SELECT id, title, description, price_toman, city, category, contact_phone,
              image_urls, created_at, status
       FROM listings
-      WHERE status = ${status}
+      WHERE (${status} = 'archive' AND status IN ('sold', 'expired'))
+         OR (${status} <> 'archive' AND status = ${status})
       ORDER BY created_at DESC
       LIMIT 200
     `;
@@ -48,15 +49,15 @@ export async function PATCH(request: NextRequest) {
 
     if (body.status !== undefined) {
       const status = String(body.status);
-      if (!["published", "rejected"].includes(status)) {
+      if (!["published", "rejected", "sold", "expired"].includes(status)) {
         return NextResponse.json({ error: "وضعیت درخواستی معتبر نیست." }, { status: 400 });
       }
-      const rows = await sql`
-        UPDATE listings SET status = ${status}
-        WHERE id = ${id} AND status = 'pending'
-        RETURNING id, status
-      `;
-      if (!rows.length) return NextResponse.json({ error: "آگهی پیدا نشد یا قبلاً بررسی شده است." }, { status: 404 });
+      const rows = status === "sold" || status === "expired"
+        ? await sql`UPDATE listings SET status = ${status} WHERE id = ${id} AND status = 'published' RETURNING id, status`
+        : status === "published"
+          ? await sql`UPDATE listings SET status = 'published' WHERE id = ${id} AND status IN ('pending', 'sold', 'expired') RETURNING id, status`
+          : await sql`UPDATE listings SET status = 'rejected' WHERE id = ${id} AND status = 'pending' RETURNING id, status`;
+      if (!rows.length) return NextResponse.json({ error: "آگهی پیدا نشد یا تغییر وضعیت برای وضعیت فعلی مجاز نیست." }, { status: 404 });
       return NextResponse.json({ success: true, listing: rows[0] });
     }
 
