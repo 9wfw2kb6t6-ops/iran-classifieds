@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
     const minPrice = minRaw ? Number(minRaw) : null;
     const maxPrice = maxRaw ? Number(maxRaw) : null;
     const rows = await sql`
-      SELECT id, title, description, price_toman, city, category, image_urls, created_at, is_featured
-      FROM listings
+      SELECT l.id, l.title, l.description, l.price_toman, l.city, l.category, l.image_urls, l.created_at, l.is_featured,
+             EXISTS (SELECT 1 FROM promotion_requests pr WHERE pr.listing_id = l.id AND pr.promotion_type = 'bump' AND pr.status = 'approved') AS is_bumped
+      FROM listings l
       WHERE status = 'published'
         AND (${q} = '' OR title ILIKE ${'%' + q + '%'} OR description ILIKE ${'%' + q + '%'})
         AND (${city} = '' OR city = ${city})
