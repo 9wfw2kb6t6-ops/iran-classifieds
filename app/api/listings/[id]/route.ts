@@ -7,7 +7,7 @@ type Context = { params: { id: string } };
 export async function GET(_request: Request, { params }: Context) {
   try {
     const { id } = params;
-    if (!/^\\d+$/.test(id) || Number(id) < 1) {
+    if (!/^\d+$/.test(id) || Number(id) < 1) {
       return NextResponse.json({ error: "شناسه آگهی معتبر نیست." }, { status: 400 });
     }
     const url = process.env.DATABASE_URL;
