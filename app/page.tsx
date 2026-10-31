@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import ListingCard from "@/components/ListingCard";
 import { categories, type Listing } from "@/data/listings";
+import locationData from "@/data/iran-locations.json";
 import { Search, MapPin, ChevronLeft, ShieldCheck, Zap, MessageCircle, SlidersHorizontal, X } from "lucide-react";
 
 type ApiListing = { id: number; title: string; description: string; price_toman: number | string; city: string; category: string; image_urls?: string[]; created_at?: string; is_featured?: boolean; is_bumped?: boolean };
@@ -13,7 +14,9 @@ const englishDigits = (value: string) => value.replace(/[۰-۹]/g, d => String("
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [province, setProvince] = useState("");
   const [city, setCity] = useState("همه شهرها");
+  const availableCities = useMemo(() => locationData.cities.filter(item => !province || item.province_id === Number(province)).sort((a, b) => a.name.localeCompare(b.name, "fa")), [province]);
   const [category, setCategory] = useState("همه");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -51,8 +54,8 @@ export default function Home() {
     return () => { active = false; };
   }, [query, city, category, minPrice, maxPrice]);
 
-  const activeFilters = Boolean(query.trim() || city !== "همه شهرها" || category !== "همه" || minPrice || maxPrice);
-  const clearFilters = () => { setQuery(""); setCity("همه شهرها"); setCategory("همه"); setMinPrice(""); setMaxPrice(""); };
+  const activeFilters = Boolean(query.trim() || province || city !== "همه شهرها" || category !== "همه" || minPrice || maxPrice);
+  const clearFilters = () => { setQuery(""); setProvince(""); setCity("همه شهرها"); setCategory("همه"); setMinPrice(""); setMaxPrice(""); };
   const invalidRange = Boolean(minPrice && maxPrice && Number(englishDigits(minPrice)) > Number(englishDigits(maxPrice)));
 
   return <><Header /><main>
@@ -64,7 +67,7 @@ export default function Home() {
         <p className="mt-3 max-w-lg text-sm leading-7 text-white/75">از خریدوفروش خودرو و خانه تا موبایل و وسایل روزمره؛ آگهی‌ات را ثبت کن یا چیزی را که دنبالش هستی پیدا کن.</p>
         <div className="mt-7 grid gap-2 rounded-2xl bg-white p-2 md:grid-cols-[1fr_180px_auto]">
           <div className="flex items-center gap-2 px-2"><Search className="text-gray-400" size={19}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="چی می‌خوای پیدا کنی؟" className="w-full py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400"/></div>
-          <div className="flex items-center gap-2 border-t border-gray-100 px-2 md:border-r md:border-t-0"><MapPin className="text-gray-400" size={18}/><select value={city} onChange={e=>setCity(e.target.value)} className="w-full bg-transparent py-3 text-sm text-gray-700 outline-none"><option>همه شهرها</option>{["تهران","کرج","اصفهان","شیراز","تبریز","رشت","مشهد","اهواز","قم","یزد","کرمانشاه","ارومیه"].map(c=><option key={c}>{c}</option>)}</select></div>
+          <div className="grid grid-cols-2 gap-2 border-t border-gray-100 px-2 md:border-r md:border-t-0"><div className="flex items-center gap-1"><MapPin className="shrink-0 text-gray-400" size={17}/><select aria-label="استان" value={province} onChange={e=>{setProvince(e.target.value);setCity("همه شهرها");}} className="w-full bg-transparent py-3 text-xs text-gray-700 outline-none"><option value="">همه استان‌ها</option>{locationData.provinces.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div><select aria-label="شهر" value={city} onChange={e=>setCity(e.target.value)} className="w-full min-w-0 bg-transparent py-3 text-xs text-gray-700 outline-none"><option value="همه شهرها">همه شهرها</option>{availableCities.map(item=><option key={item.id} value={item.name}>{item.name}</option>)}</select></div>
           <button onClick={()=>document.getElementById("latest")?.scrollIntoView({behavior:"smooth"})} className="btn btn-primary px-7">جست‌وجو</button>
         </div>
         <button onClick={()=>setShowFilters(v=>!v)} className="mt-3 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white"><SlidersHorizontal size={16}/> فیلتر قیمت و دسته‌بندی {showFilters ? "−" : "+"}</button>
