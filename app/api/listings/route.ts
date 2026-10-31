@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
     const q = (request.nextUrl.searchParams.get("q") || "").trim().slice(0, 80);
     const city = (request.nextUrl.searchParams.get("city") || "").trim().slice(0, 60);
     const category = (request.nextUrl.searchParams.get("category") || "").trim().slice(0, 60);
+    const minRaw = (request.nextUrl.searchParams.get("min_price") || "").replace(/[^0-9]/g, "");
+    const maxRaw = (request.nextUrl.searchParams.get("max_price") || "").replace(/[^0-9]/g, "");
+    const minPrice = minRaw ? Number(minRaw) : null;
+    const maxPrice = maxRaw ? Number(maxRaw) : null;
     const rows = await sql`
       SELECT id, title, description, price_toman, city, category, image_urls, created_at, is_featured
       FROM listings
@@ -25,6 +29,8 @@ export async function GET(request: NextRequest) {
         AND (${q} = '' OR title ILIKE ${'%' + q + '%'} OR description ILIKE ${'%' + q + '%'})
         AND (${city} = '' OR city = ${city})
         AND (${category} = '' OR category = ${category})
+        AND (${minPrice}::bigint IS NULL OR price_toman >= ${minPrice})
+        AND (${maxPrice}::bigint IS NULL OR price_toman <= ${maxPrice})
       ORDER BY is_featured DESC, created_at DESC
       LIMIT 60
     `;
