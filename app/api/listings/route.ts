@@ -44,6 +44,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const userId = getUserIdFromRequest(request);
+  if (!userId) {
+    return NextResponse.json({ error: "برای ثبت آگهی ابتدا وارد حساب کاربری شوید." }, { status: 401 });
+  }
   const uploadedUrls: string[] = [];
   try {
     const form = await request.formData();
@@ -88,7 +92,6 @@ export async function POST(request: NextRequest) {
     }
 
     const sql = db();
-    const userId = getUserIdFromRequest(request);
     const rows = await sql`
       INSERT INTO listings (user_id, title, description, price_toman, city, category, contact_phone, status, image_urls)
       VALUES (${userId}, ${title}, ${description}, ${price}, ${city}, ${category}, ${contactPhone}, 'pending', ${uploadedUrls}::text[])
