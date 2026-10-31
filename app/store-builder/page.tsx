@@ -5,20 +5,28 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import { Store, ShoppingBag, Palette, Globe2, CheckCircle2, ArrowLeft, Sparkles } from "lucide-react";
 
-const plans = [
-  { id: "basic", name: "فروشگاه عادی", price: "۴ میلیون تومان", note: "شروع حرفه‌ای فروش آنلاین", features: ["صفحه اختصاصی فروشگاه داخل سه‌سوته", "دسته‌بندی و معرفی محصولات", "اطلاعات تماس و ثبت سفارش", "طراحی واکنش‌گرا برای موبایل"] },
-  { id: "pro", name: "فروشگاه حرفه‌ای", price: "۸ میلیون تومان", note: "برای کسب‌وکارهای در حال رشد", features: ["تمام امکانات نسخه عادی", "طراحی اختصاصی‌تر و چیدمان ویژه", "پنل مدیریت محصولات و سفارش‌ها", "گزارش سفارش‌ها و وضعیت آن‌ها"] },
-  { id: "custom", name: "فروشگاه اختصاصی", price: "از ۱۵ میلیون تومان", note: "متناسب با نیاز و برند شما", features: ["طراحی متناسب با هویت برند", "امکان راه‌اندازی روی دامنه مستقل", "امکانات سفارشی طبق توافق", "برآورد هزینه پیش از شروع پروژه"] }
-];
+const planCatalog = {
+  inside: [
+    { id: "basic", name: "فروشگاه عادی", price: "۴ میلیون تومان", note: "شروع فروش در بازار سه‌سوته", features: ["صفحه اختصاصی فروشگاه داخل سه‌سوته", "دسته‌بندی و معرفی محصولات", "اطلاعات تماس و ثبت سفارش", "طراحی واکنش‌گرا برای موبایل"] },
+    { id: "pro", name: "فروشگاه حرفه‌ای", price: "۸ میلیون تومان", note: "برای کسب‌وکارهای در حال رشد", features: ["تمام امکانات نسخه عادی", "طراحی اختصاصی‌تر و چیدمان ویژه", "پنل مدیریت محصولات و سفارش‌ها", "گزارش سفارش‌ها و وضعیت آن‌ها"] },
+    { id: "custom", name: "فروشگاه اختصاصی", price: "از ۱۵ میلیون تومان", note: "متناسب با نیاز و برند شما", features: ["طراحی متناسب با هویت برند", "امکانات سفارشی طبق توافق", "صفحه‌ها و قابلیت‌های اختصاصی", "برآورد هزینه پیش از شروع پروژه"] }
+  ],
+  independent: [
+    { id: "basic", name: "سایت فروشگاهی پایه", price: "۸ میلیون تومان", note: "شروع حضور مستقل با برند خودتان", features: ["طراحی سایت با هویت برند شما", "صفحه اصلی و معرفی فروشگاه", "صفحات محصول و اطلاعات تماس", "نمایش واکنش‌گرا در موبایل"] },
+    { id: "pro", name: "سایت فروشگاهی حرفه‌ای", price: "۱۵ میلیون تومان", note: "برای فروشگاه‌های در حال توسعه", features: ["تمام امکانات نسخه پایه", "طراحی اختصاصی‌تر صفحات", "مدیریت محصولات و سفارش‌ها", "اتصال دامنه اختصاصی و تنظیمات اولیه"] },
+    { id: "custom", name: "سایت فروشگاهی اختصاصی", price: "از ۲۵ میلیون تومان", note: "راهکار اختصاصی متناسب با کسب‌وکار", features: ["طراحی اختصاصی بر اساس برند", "امکانات و بخش‌های سفارشی", "قابلیت توسعه متناسب با نیاز", "برآورد فنی و مالی پیش از شروع"] }
+  ]
+};
 
 export default function StoreBuilderPage() {
-  const [selected, setSelected] = useState("basic");
-  const [kind, setKind] = useState("inside");
+  const [selected, setSelected] = useState<"basic" | "pro" | "custom">("basic");
+  const [kind, setKind] = useState<"inside" | "independent">("inside");
   const [business, setBusiness] = useState("");
   const [phone, setPhone] = useState("");
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
   const [description, setDescription] = useState("");
+  const plans = planCatalog[kind];
   const chosen = plans.find(p => p.id === selected)!;
 
   async function submitRequest() {
