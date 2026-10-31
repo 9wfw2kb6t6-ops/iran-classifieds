@@ -30,8 +30,7 @@ export default function StoreBuilderPage() {
       if (!response.ok) throw new Error(data.error || "ثبت درخواست انجام نشد.");
       setMessage(`درخواست شماره ${data.request.id} با موفقیت ثبت شد. تیم سه‌سوته با شما تماس می‌گیرد.`);
       setBusiness(""); setPhone(""); setDescription("");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "ثبت درخواست انجام نشد."); }
-    setSending(false);
+    } catch (error) { setMessage(error instanceof Error ? error.message : "ثبت درخواست انجام نشد."); } finally { setSending(false); }
   };
 
   return <><Header /><main className="min-h-screen bg-[#fffaf4]">
