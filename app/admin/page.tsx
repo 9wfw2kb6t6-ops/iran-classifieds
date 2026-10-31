@@ -140,3 +140,5 @@ export default function AdminPage() {
 const panelStyle: React.CSSProperties = { background: "#fff", border: "1px solid #eee4d9", borderRadius: 18, padding: 20, boxShadow: "0 8px 24px rgba(24,52,60,.05)" };
 const inputStyle: React.CSSProperties = { display: "block", width: "100%", boxSizing: "border-box", margin: "9px 0 16px", padding: 13, border: "1px solid #d8dfe0", borderRadius: 10, fontSize: 16 };
 const buttonStyle = (background: string): React.CSSProperties => ({ background, color: "white", border: 0, borderRadius: 10, padding: "12px 18px", fontWeight: 800, cursor: "pointer" });
+
+// Admin route deployment refresh.
