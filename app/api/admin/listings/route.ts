@@ -16,7 +16,8 @@ export async function GET() {
     if (!url) throw new Error("DATABASE_NOT_CONFIGURED");
     const sql = neon(url);
     const rows = await sql`
-      SELECT id, title, description, price_toman, city, category, created_at, status
+      SELECT id, title, description, price_toman, city, category, contact_phone,
+             image_urls, created_at, status
       FROM listings
       WHERE status = 'pending'
       ORDER BY created_at ASC
