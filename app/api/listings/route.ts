@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     `;
     return NextResponse.json({ listings: rows });
   } catch (error) {
+    console.error("LISTINGS_API_ERROR", error);
     const missing = error instanceof Error && error.message === "DATABASE_NOT_CONFIGURED";
     return NextResponse.json(
       { error: missing ? "پایگاه داده هنوز متصل نشده است." : "دریافت آگهی‌ها ممکن نشد." },
