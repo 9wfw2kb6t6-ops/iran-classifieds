@@ -1,7 +1,9 @@
+    const userId = getUserIdFromRequest(request);
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
+import { getUserIdFromRequest } from "@/lib/user-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,8 +90,8 @@ export async function POST(request: NextRequest) {
 
     const sql = db();
     const rows = await sql`
-      INSERT INTO listings (title, description, price_toman, city, category, contact_phone, status, image_urls)
-      VALUES (${title}, ${description}, ${price}, ${city}, ${category}, ${contactPhone}, 'pending', ${uploadedUrls}::text[])
+      INSERT INTO listings (user_id, title, description, price_toman, city, category, contact_phone, status, image_urls)
+      VALUES (${userId}, ${title}, ${description}, ${price}, ${city}, ${category}, ${contactPhone}, 'pending', ${uploadedUrls}::text[])
       RETURNING id, title, status, created_at, image_urls
     `;
     return NextResponse.json({ success: true, listing: rows[0], message: "آگهی شما ثبت شد و پس از بررسی منتشر می‌شود." }, { status: 201 });
