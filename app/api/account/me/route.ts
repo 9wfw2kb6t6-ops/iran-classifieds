@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const sql = neon(process.env.DATABASE_URL!);
     const rows = await sql`SELECT id, phone, display_name, created_at FROM users WHERE id = ${userId} LIMIT 1`;
     if (!rows.length) return NextResponse.json({ user: null });
-    const listings = await sql`SELECT id, title, price_toman, city, category, status, created_at, image_urls FROM listings WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 100`;
+    const listings = await sql`SELECT id, title, description, price_toman, city, category, contact_phone, status, created_at, image_urls FROM listings WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 100`;
     return NextResponse.json({ user: rows[0], listings });
   } catch (error) {
     console.error("ACCOUNT_ME_ERROR", error);
