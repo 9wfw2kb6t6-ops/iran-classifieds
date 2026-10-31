@@ -5,9 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 type Listing = {
   id: number; title: string; description: string; price_toman: number;
   city: string; category: string; contact_phone: string;
-  image_urls: string[]; created_at: string;
+  image_urls: string[]; created_at: string; status?: string;
 };
-type Tab = "pending" | "published";
+type Tab = "pending" | "published" | "archive";
 type EditForm = { title: string; description: string; price_toman: string; city: string; category: string; contact_phone: string };
 
 const money = (value: number) => value === 0 ? "توافقی / رایگان" : new Intl.NumberFormat("fa-IR").format(value) + " تومان";
@@ -122,11 +122,12 @@ export default function AdminPage() {
             <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 18 }}>
               <button onClick={() => { setEditing(null); setEditForm(null); setTab("pending"); }} style={buttonStyle(tab === "pending" ? "#F47735" : "#18343C")}>در انتظار بررسی</button>
               <button onClick={() => { setEditing(null); setEditForm(null); setTab("published"); }} style={buttonStyle(tab === "published" ? "#F47735" : "#18343C")}>آگهی‌های منتشرشده</button>
+              <button onClick={() => { setEditing(null); setEditForm(null); setTab("archive"); }} style={buttonStyle(tab === "archive" ? "#F47735" : "#18343C")}>فروخته‌شده / منقضی‌شده</button>
               <button onClick={() => loadListings(tab)} disabled={loading} style={buttonStyle("#607579")}>بروزرسانی</button>
             </div>
-            <h2 style={{ margin: "0 0 14px" }}>{tab === "pending" ? "آگهی‌های در انتظار بررسی" : "مدیریت آگهی‌های منتشرشده"} ({listings.length})</h2>
+            <h2 style={{ margin: "0 0 14px" }}>{tab === "pending" ? "آگهی‌های در انتظار بررسی" : tab === "published" ? "مدیریت آگهی‌های منتشرشده" : "آگهی‌های آرشیوشده"} ({listings.length})</h2>
             {loading && <p>در حال دریافت آگهی‌ها...</p>}
-            {!loading && listings.length === 0 && <div style={panelStyle}>{tab === "pending" ? "فعلاً آگهی در انتظار بررسی وجود ندارد." : "هنوز آگهی منتشرشده‌ای ثبت نشده است."}</div>}
+            {!loading && listings.length === 0 && <div style={panelStyle}>{tab === "pending" ? "فعلاً آگهی در انتظار بررسی وجود ندارد." : tab === "published" ? "هنوز آگهی منتشرشده‌ای ثبت نشده است." : "آگهی فروخته‌شده یا منقضی‌شده‌ای وجود ندارد."}</div>}
             <div style={{ display: "grid", gap: 16 }}>
               {listings.map(item => (
                 <article key={item.id} style={panelStyle}>
@@ -149,7 +150,7 @@ export default function AdminPage() {
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
                         <h3 style={{ margin: 0, fontSize: 19 }}>{item.title}</h3><span style={{ color: "#F47735", fontWeight: 900 }}>{money(Number(item.price_toman))}</span>
                       </div>
-                      <p style={{ color: "#607176", fontSize: 13, lineHeight: 1.9 }}>{item.city} · {item.category} · کد آگهی: {item.id}<br/>زمان ثبت: {dateText(item.created_at)}</p>
+                      <p style={{ color: "#607176", fontSize: 13, lineHeight: 1.9 }}>{item.city} · {item.category} · کد آگهی: {item.id}<br/>زمان ثبت: {dateText(item.created_at)}{item.status ? " · وضعیت: " + (item.status === "sold" ? "فروخته‌شده" : item.status === "expired" ? "منقضی‌شده" : item.status) : ""}</p>
                       <p style={{ whiteSpace: "pre-wrap", lineHeight: 1.9 }}>{item.description}</p>
                       <div style={{ background: "#F5F8F7", borderRadius: 12, padding: 12, marginBottom: 14 }}>
                         <strong style={{ fontSize: 13 }}>شماره تماس آگهی‌دهنده: </strong><a href={"tel:" + item.contact_phone} dir="ltr" style={{ color: "#087B61", fontWeight: 800 }}>{item.contact_phone}</a>
@@ -161,9 +162,13 @@ export default function AdminPage() {
                         {tab === "pending" ? <>
                           <button disabled={busy === item.id} onClick={() => changeStatus(item.id, "published")} style={buttonStyle("#16835D")}>تأیید و انتشار</button>
                           <button disabled={busy === item.id} onClick={() => changeStatus(item.id, "rejected")} style={buttonStyle("#A33D36")}>رد آگهی</button>
-                        </> : <>
+                        </> : tab === "published" ? <>
                           <button onClick={() => beginEdit(item)} style={buttonStyle("#16758A")}>ویرایش آگهی</button>
+                          <button disabled={busy === item.id} onClick={() => changeStatus(item.id, "sold")} style={buttonStyle("#16835D")}>علامت‌گذاری به‌عنوان فروخته‌شده</button>
+                          <button disabled={busy === item.id} onClick={() => changeStatus(item.id, "expired")} style={buttonStyle("#A36A24")}>انتقال به منقضی‌شده</button>
                           <button disabled={busy === item.id} onClick={() => deleteListing(item.id)} style={buttonStyle("#A33D36")}>{busy === item.id ? "در حال حذف..." : "حذف آگهی"}</button>
+                        </> : <>
+                          <button disabled={busy === item.id} onClick={() => changeStatus(item.id, "published")} style={buttonStyle("#16835D")}>بازگردانی به آگهی‌های فعال</button>
                         </>}
                       </div>
                     </>
