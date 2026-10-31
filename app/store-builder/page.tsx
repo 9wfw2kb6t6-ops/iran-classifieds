@@ -66,7 +66,25 @@ export default function StoreBuilderPage() {
     </section>
 
     <section id="plans" className="container pb-14"><div className="mb-7 text-center"><h2 className="text-2xl font-black text-[#18343c]">تعرفه ساخت فروشگاه</h2><p className="mt-2 text-sm text-[#68777b]">هزینه ساخت یک‌باره است؛ قیمت نهایی با توجه به امکانات و جزئیات پروژه تأیید می‌شود.</p></div>
-      <div className="grid gap-4 md:grid-cols-3">{plans.map((p,i)=><article key={p.id} className={`rounded-3xl border bg-white p-6 ${selected===p.id ? "border-[#f47735] shadow-xl shadow-orange-100" : "border-[#eee3d7]"`}><div className="flex items-center justify-between"><span className="rounded-full bg-[#fff1e7] p-3 text-[#e66d2d]">{i===0?<ShoppingBag size={22}/>:i===1?<Palette size={22}/>:<Globe2 size={22}/>}</span>{selected===p.id && <span className="text-xs font-bold text-[#d85f24]">انتخاب شده</span>}</div><h3 className="mt-5 text-lg font-black text-[#18343c]">{p.name}</h3><p className="mt-1 text-xs text-[#829094]">{p.note}</p><p className="mt-5 text-2xl font-black text-[#18343c]">{p.price}</p><ul className="mt-5 space-y-3">{p.features.map(f=><li key={f} className="flex items-start gap-2 text-sm leading-6 text-[#526268]"><CheckCircle2 className="mt-1 shrink-0 text-[#16a36a]" size={16}/>{f}</li>)}</ul><button onClick={()=>setSelected(p.id)} className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-black ${selected===p.id ? "bg-[#18343c] text-white" : "bg-[#fff1e7] text-[#d85f24]"}`}>انتخاب این طرح</button></article>)}</div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {plans.map((p, i) => (
+          <article key={p.id} className={`rounded-3xl border bg-white p-6 ${selected === p.id ? "border-[#f47735] shadow-xl shadow-orange-100" : "border-[#eee3d7]"}`}>
+            <div className="flex items-center justify-between">
+              <span className="rounded-full bg-[#fff1e7] p-3 text-[#e66d2d]">
+                {i === 0 ? <ShoppingBag size={22}/> : i === 1 ? <Palette size={22}/> : <Globe2 size={22}/>}
+              </span>
+              {selected === p.id && <span className="text-xs font-bold text-[#d85f24]">انتخاب شده</span>}
+            </div>
+            <h3 className="mt-5 text-lg font-black text-[#18343c]">{p.name}</h3>
+            <p className="mt-1 text-xs text-[#829094]">{p.note}</p>
+            <p className="mt-5 text-2xl font-black text-[#18343c]">{p.price}</p>
+            <ul className="mt-5 space-y-3">
+              {p.features.map(f => <li key={f} className="flex items-start gap-2 text-sm leading-6 text-[#526268]"><CheckCircle2 className="mt-1 shrink-0 text-[#16a36a]" size={16}/>{f}</li>)}
+            </ul>
+            <button onClick={() => setSelected(p.id)} className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-black ${selected === p.id ? "bg-[#18343c] text-white" : "bg-[#fff1e7] text-[#d85f24]"}`}>انتخاب این طرح</button>
+          </article>
+        ))}
+      </div>
     </section>
 
     <section className="container pb-16"><div className="mx-auto max-w-3xl rounded-3xl bg-white p-6 shadow-sm ring-1 ring-[#eee3d7] md:p-9"><div className="flex items-center gap-3"><div className="rounded-2xl bg-[#fff1e7] p-3 text-[#e66d2d]"><Store size={24}/></div><div><h2 className="text-xl font-black text-[#18343c]">درخواست ساخت فروشگاه</h2><p className="mt-1 text-xs text-[#829094]">اطلاعات اولیه را وارد کن تا درخواستت آماده شود.</p></div></div>
