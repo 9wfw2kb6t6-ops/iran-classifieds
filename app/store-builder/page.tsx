@@ -19,9 +19,9 @@ export default function StoreBuilderPage() {
   const chosen = plans.find(p => p.id === selected)!;
 
   const submitRequest = () => {
-    const subject = encodeURIComponent("درخواست فروشگاه‌ساز سه‌سوته");
-    const body = encodeURIComponent(`نوع فروشگاه: ${chosen.name}\nمدل اجرا: ${kind === "inside" ? "داخل سه‌سوته" : "سایت مستقل"}\nنام کسب‌وکار: ${business}\nتوضیحات: ${description}\nقیمت پایه: ${chosen.price}`);
-    navigator.clipboard?.writeText(`درخواست فروشگاه‌ساز سه‌سوته\\n${decodeURIComponent(body)}`).then(() => alert("متن درخواست کپی شد؛ در مرحله بعد ثبت مستقیم داخل سایت را فعال می‌کنیم.")).catch(() => alert("امکان کپی خودکار نبود؛ لطفاً دوباره تلاش کن."));
+    const requestText = `درخواست فروشگاه‌ساز سه‌سوته\nنوع فروشگاه: ${chosen.name}\nمدل اجرا: ${kind === "inside" ? "داخل سه‌سوته" : "سایت مستقل"}\nنام کسب‌وکار: ${business}\nتوضیحات: ${description}\nقیمت پایه: ${chosen.price}`;
+    if (navigator.clipboard) navigator.clipboard.writeText(requestText).then(() => alert("متن درخواست کپی شد؛ ثبت مستقیم درخواست را در مرحله بعد فعال می‌کنیم.")).catch(() => alert(requestText));
+    else alert(requestText);
   };
 
   return <><Header /><main className="min-h-screen bg-[#fffaf4]">
