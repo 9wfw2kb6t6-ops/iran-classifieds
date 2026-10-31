@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
+import locationData from "@/data/iran-locations.json";
 
-const cities = ["تهران","کرج","اصفهان","شیراز","تبریز","رشت","مشهد","اهواز","قم","یزد","کرمانشاه","ارومیه"];
+type Province = { id: number; name: string };
+type City = { id: number; name: string; province_id: number };
 const categories = ["املاک","خودرو","موبایل و دیجیتال","خانه و آشپزخانه","استخدام و کاریابی","خدمات","وسایل شخصی","ورزش و سرگرمی"];
 
 export default function PostAd() {
   const [form, setForm] = useState({ title: "", category: "", price_toman: "", city: "", description: "", contact_phone: "" });
+  const [province, setProvince] = useState("");
+  const availableCities = useMemo(() => (locationData.cities as City[]).filter(city => city.province_id === Number(province)).sort((a, b) => a.name.localeCompare(b.name, "fa")), [province]);
   const [images, setImages] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -38,6 +42,7 @@ export default function PostAd() {
       if (!response.ok) throw new Error(result.error || "ثبت آگهی انجام نشد.");
       setMessage(result.message || "آگهی با موفقیت ثبت شد.");
       setForm({ title: "", category: "", price_toman: "", city: "", description: "", contact_phone: "" });
+      setProvince("");
       setImages([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "ارتباط با سرور برقرار نشد.");
@@ -50,7 +55,7 @@ export default function PostAd() {
       <label className="block text-sm font-bold">عنوان آگهی<input required minLength={5} maxLength={100} value={form.title} onChange={e=>update("title",e.target.value)} className="field mt-2" placeholder="مثلاً فروش گوشی سامسونگ"/></label>
       <label className="block text-sm font-bold">دسته‌بندی<select required value={form.category} onChange={e=>update("category",e.target.value)} className="field mt-2"><option value="">انتخاب دسته‌بندی</option>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
       <label className="block text-sm font-bold">قیمت (تومان)<input inputMode="numeric" value={form.price_toman} onChange={e=>update("price_toman",e.target.value)} className="field mt-2" placeholder="برای کالای رایگان یا توافقی خالی بگذار"/></label>
-      <label className="block text-sm font-bold">شهر<select required value={form.city} onChange={e=>update("city",e.target.value)} className="field mt-2"><option value="">انتخاب شهر</option>{cities.map(x=><option key={x}>{x}</option>)}</select></label>
+      <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-bold">استان<select required value={province} onChange={e=>{setProvince(e.target.value);update("city","");}} className="field mt-2"><option value="">انتخاب استان</option>{(locationData.provinces as Province[]).slice().sort((a,b)=>a.name.localeCompare(b.name,"fa")).map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label className="block text-sm font-bold">شهر<select required value={form.city} disabled={!province} onChange={e=>update("city",e.target.value)} className="field mt-2 disabled:cursor-not-allowed disabled:opacity-60"><option value="">{province ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"}</option>{availableCities.map(item=><option key={item.id} value={item.name}>{item.name}</option>)}</select></label></div>
       <label className="block text-sm font-bold">شماره تماس آگهی‌دهنده<input required type="tel" inputMode="tel" dir="ltr" maxLength={13} value={form.contact_phone} onChange={e=>update("contact_phone",e.target.value)} className="field mt-2 text-left" placeholder="09123456789"/><span className="mt-1 block text-xs font-normal text-muted">این شماره پس از تأیید آگهی برای بازدیدکنندگان نمایش داده می‌شود.</span></label>
       <label className="block text-sm font-bold">توضیحات<textarea required minLength={10} maxLength={4000} value={form.description} onChange={e=>update("description",e.target.value)} className="field mt-2 min-h-32" placeholder="هر چیزی که خریدار باید درباره آگهی بداند..."/></label>
       <div className="rounded-2xl border border-dashed border-orange-300 bg-orange-50/60 p-4">
