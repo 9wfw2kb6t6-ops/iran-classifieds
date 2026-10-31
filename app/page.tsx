@@ -5,7 +5,7 @@ import ListingCard from "@/components/ListingCard";
 import { categories, type Listing } from "@/data/listings";
 import { Search, MapPin, ChevronLeft, ShieldCheck, Zap, MessageCircle, SlidersHorizontal, X } from "lucide-react";
 
-type ApiListing = { id: number; title: string; description: string; price_toman: number | string; city: string; category: string; image_urls?: string[]; created_at?: string; is_featured?: boolean };
+type ApiListing = { id: number; title: string; description: string; price_toman: number | string; city: string; category: string; image_urls?: string[]; created_at?: string; is_featured?: boolean; is_bumped?: boolean };
 const fallbackImage = "https://images.unsplash.com/photo-1560461396-ecf8d8c3e6f5?auto=format&fit=crop&w=900&q=80";
 const toman = (value: number | string) => Number(value) > 0 ? new Intl.NumberFormat("fa-IR").format(Number(value)) + " تومان" : "توافقی";
 const englishDigits = (value: string) => value.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[٬,\s]/g, "");
@@ -42,7 +42,7 @@ export default function Home() {
           id: Number(row.id), title: row.title, description: row.description,
           price: toman(row.price_toman), city: row.city, category: row.category,
           image: row.image_urls?.[0] || fallbackImage, time: "آگهی ثبت‌شده",
-          featured: Boolean(row.is_featured)
+          featured: Boolean(row.is_featured), bumped: Boolean(row.is_bumped)
         })));
       })
       .catch(() => { if (active) { setLiveListings([]); setLoadError(true); } })
