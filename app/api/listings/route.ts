@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { put } from "@vercel/blob";
+import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,14 +37,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const uploadedUrls: string[] = [];
   try {
-    const body = await request.json();
-    const title = String(body.title || "").trim().slice(0, 100);
-    const description = String(body.description || "").trim().slice(0, 4000);
-    const city = String(body.city || "").trim().slice(0, 80);
-    const category = String(body.category || "").trim().slice(0, 80);
-    const rawPrice = String(body.price_toman ?? "").replace(/[٬,\s]/g, "");
+    const form = await request.formData();
+    const title = String(form.get("title") || "").trim().slice(0, 100);
+    const description = String(form.get("description") || "").trim().slice(0, 4000);
+    const city = String(form.get("city") || "").trim().slice(0, 80);
+    const category = String(form.get("category") || "").trim().slice(0, 80);
+    const rawPrice = String(form.get("price_toman") ?? "").replace(/[٬,\\s]/g, "");
     const price = rawPrice === "" ? 0 : Number(rawPrice);
+    const files = form.getAll("images").filter((item): item is File => item instanceof File && item.size > 0);
 
     if (title.length < 5 || description.length < 10 || city.length < 2 || category.length < 2) {
       return NextResponse.json({ error: "لطفاً عنوان، توضیحات، شهر و دسته‌بندی را کامل وارد کنید." }, { status: 400 });
@@ -50,17 +54,38 @@ export async function POST(request: NextRequest) {
     if (!Number.isSafeInteger(price) || price < 0) {
       return NextResponse.json({ error: "قیمت واردشده معتبر نیست." }, { status: 400 });
     }
+    if (files.length > 4) {
+      return NextResponse.json({ error: "حداکثر ۴ عکس می‌توانید بارگذاری کنید." }, { status: 400 });
+    }
+    for (const file of files) {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        return NextResponse.json({ error: "فرمت عکس باید JPG، PNG یا WEBP باشد." }, { status: 400 });
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: "حجم هر عکس نباید بیشتر از ۵ مگابایت باشد." }, { status: 400 });
+      }
+    }
+
+    for (const file of files) {
+      const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+      const blob = await put("listings/" + randomUUID() + "." + ext, file, {
+        access: "public",
+        addRandomSuffix: true,
+        contentType: file.type,
+      });
+      uploadedUrls.push(blob.url);
+    }
 
     const sql = db();
     const rows = await sql`
       INSERT INTO listings (title, description, price_toman, city, category, status, image_urls)
-      VALUES (${title}, ${description}, ${price}, ${city}, ${category}, 'pending', ARRAY[]::text[])
-      RETURNING id, title, status, created_at
+      VALUES (${title}, ${description}, ${price}, ${city}, ${category}, 'pending', ${uploadedUrls}::text[])
+      RETURNING id, title, status, created_at, image_urls
     `;
     return NextResponse.json({ success: true, listing: rows[0], message: "آگهی شما ثبت شد و پس از بررسی منتشر می‌شود." }, { status: 201 });
   } catch (error) {
     console.error("CREATE_LISTING_ERROR", error);
     const missing = error instanceof Error && error.message === "DATABASE_NOT_CONFIGURED";
-    return NextResponse.json({ error: missing ? "پایگاه داده هنوز متصل نشده است." : "ثبت آگهی انجام نشد. دوباره تلاش کنید." }, { status: missing ? 503 : 500 });
+    return NextResponse.json({ error: missing ? "پایگاه داده هنوز متصل نشده است." : "ثبت آگهی یا بارگذاری عکس انجام نشد. دوباره تلاش کنید." }, { status: missing ? 503 : 500 });
   }
 }
