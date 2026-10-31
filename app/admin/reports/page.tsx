@@ -1,0 +1,27 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+
+type Report = { id:number; listing_id:number; reason:string; details:string|null; reporter_contact:string|null; status:string; created_at:string; listing_title:string|null; listing_city:string|null; listing_status:string|null };
+const labels:Record<string,string> = { fraud:"احتمال کلاهبرداری", wrong_info:"اطلاعات نادرست", prohibited:"محتوای ممنوع", duplicate:"آگهی تکراری", other:"سایر موارد" };
+const statuses:Record<string,string> = { open:"جدید", reviewing:"در حال بررسی", resolved:"رسیدگی شد", dismissed:"رد گزارش" };
+const btn=(bg:string):React.CSSProperties=>({background:bg,color:"#fff",border:0,borderRadius:9,padding:"10px 13px",fontWeight:800,cursor:"pointer"});
+
+export default function AdminReportsPage(){
+ const [reports,setReports]=useState<Report[]>([]);
+ const [loading,setLoading]=useState(true);
+ const [message,setMessage]=useState("");
+ const [loggedIn,setLoggedIn]=useState(false);
+ const [password,setPassword]=useState("");
+ const [busy,setBusy]=useState<number|null>(null);
+ const load=useCallback(async()=>{setLoading(true);setMessage("");try{const r=await fetch("/api/admin/reports",{cache:"no-store"});const d=await r.json();if(!r.ok)throw new Error(d.error||"دریافت گزارش‌ها ناموفق بود.");setReports(d.reports||[]);setLoggedIn(true);}catch(e){setLoggedIn(false);setMessage(e instanceof Error?e.message:"خطا");}finally{setLoading(false);}},[]);
+ useEffect(()=>{void load();},[load]);
+ async function login(e:React.FormEvent){e.preventDefault();setLoading(true);setMessage("");try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});const d=await r.json();if(!r.ok)throw new Error(d.error||"ورود ناموفق بود.");setPassword("");await load();}catch(e){setMessage(e instanceof Error?e.message:"ورود ناموفق بود.");setLoading(false);}}
+ async function update(id:number,status:string){setBusy(id);setMessage("");try{const r=await fetch("/api/admin/reports",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status})});const d=await r.json();if(!r.ok)throw new Error(d.error||"تغییر وضعیت انجام نشد.");await load();setMessage("وضعیت گزارش به‌روزرسانی شد.");}catch(e){setMessage(e instanceof Error?e.message:"خطا");}finally{setBusy(null);}}
+ return <main dir="rtl" style={{minHeight:"100vh",background:"#FFF8EF",padding:"25px 15px",color:"#18343C"}}><div style={{maxWidth:950,margin:"auto"}}>
+ <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:20}}><div><b style={{color:"#F47735"}}>سه‌سوته</b><h1 style={{fontSize:26,fontWeight:900,margin:"5px 0"}}>گزارش‌های کاربران</h1><p style={{color:"#647579",margin:0}}>رسیدگی به گزارش آگهی‌های مشکوک</p></div><Link href="/admin" style={btn("#18343C")}>بازگشت به پنل مدیریت</Link></header>
+ {message&&<p role="status" style={{background:"#fff",padding:12,borderRadius:10}}>{message}</p>}
+ {!loggedIn?<form onSubmit={login} style={{background:"#fff",padding:22,borderRadius:16,border:"1px solid #eee4d9"}}><h2 style={{fontWeight:900}}>ورود مدیر</h2><label>رمز مدیریت<input type="password" required autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} style={{display:"block",width:"100%",padding:12,border:"1px solid #ddd",borderRadius:9,margin:"8px 0 14px"}}/></label><button disabled={loading} style={btn("#F47735")}>ورود</button></form>:<><div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:14}}><b>تعداد گزارش‌ها: {reports.length}</b><button onClick={()=>void load()} disabled={loading} style={btn("#607579")}>به‌روزرسانی</button></div>{loading?<p>در حال دریافت...</p>:reports.length===0?<div style={{background:"#fff",padding:25,borderRadius:15}}>هنوز گزارشی ثبت نشده است.</div>:<div style={{display:"grid",gap:13}}>{reports.map(x=><article key={x.id} style={{background:"#fff",padding:18,borderRadius:15,border:"1px solid #eee4d9"}}><div style={{display:"flex",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}><b>گزارش #{x.id} · آگهی #{x.listing_id}</b><b style={{color:x.status==="open"?"#b45309":"#16758A"}}>{statuses[x.status]||x.status}</b></div><h2 style={{fontSize:18,fontWeight:900,margin:"10px 0"}}>{x.listing_title||"آگهی حذف شده"} {x.listing_city?"· "+x.listing_city:""}</h2><p style={{margin:"6px 0"}}><b>دلیل:</b> {labels[x.reason]||x.reason}</p>{x.details&&<p style={{whiteSpace:"pre-wrap",lineHeight:1.8}}><b>توضیحات:</b> {x.details}</p>}{x.reporter_contact&&<p><b>راه تماس گزارش‌دهنده:</b> {x.reporter_contact}</p>}<small style={{color:"#718084"}}>{new Intl.DateTimeFormat("fa-IR",{dateStyle:"medium",timeStyle:"short"}).format(new Date(x.created_at))} · وضعیت آگهی: {x.listing_status||"حذف‌شده"}</small><div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:14}}>{x.status==="open"&&<button disabled={busy===x.id} onClick={()=>void update(x.id,"reviewing")} style={btn("#16758A")}>شروع بررسی</button>}{x.status!=="resolved"&&<button disabled={busy===x.id} onClick={()=>void update(x.id,"resolved")} style={btn("#16835D")}>رسیدگی شد</button>}{x.status!=="dismissed"&&<button disabled={busy===x.id} onClick={()=>void update(x.id,"dismissed")} style={btn("#A33D36")}>رد گزارش</button>}</div></article>)}</div>}</>}
+ </div></main>;
+}
