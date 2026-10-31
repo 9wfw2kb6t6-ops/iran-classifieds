@@ -15,13 +15,13 @@ export async function POST(request: NextRequest) {
     const phone = rawPhone
       .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
       .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
-      .replace(/[\\s()-]/g, "")
-      .replace(/^\\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
+      .replace(/[\s()-]/g, "")
+      .replace(/^\+98/, "0").replace(/^0098/, "0").replace(/^98(?=9)/, "0");
     const model = String(body.store_model || "");
     const plan = String(body.plan_code || "");
     const description = String(body.description || "").trim().slice(0, 3000);
     if (businessName.length < 2) return NextResponse.json({ error: "نام کسب‌وکار را وارد کنید." }, { status: 400 });
-    if (!/^09\\d{9}$/.test(phone)) return NextResponse.json({ error: "شماره موبایل ایران را مثل 09123456789 وارد کنید." }, { status: 400 });
+    if (!/^09\d{9}$/.test(phone)) return NextResponse.json({ error: "شماره موبایل ایران را مثل 09123456789 وارد کنید." }, { status: 400 });
     if (!["inside", "independent"].includes(model) || !["basic", "pro", "custom"].includes(plan)) return NextResponse.json({ error: "نوع فروشگاه یا طرح انتخابی معتبر نیست." }, { status: 400 });
     const sql = neon(process.env.DATABASE_URL!);
     const rows = await sql`INSERT INTO store_builder_requests (user_id,business_name,contact_phone,store_model,plan_code,description)
