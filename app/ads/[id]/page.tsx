@@ -28,6 +28,23 @@ export default function AdDetailPage() {
 
   const photos = ad?.image_urls?.length ? ad.image_urls : [];
   const whatsappPhone = ad?.contact_phone ? "98" + ad.contact_phone.slice(1) : "";
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("fraud");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportContact, setReportContact] = useState("");
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportMessage, setReportMessage] = useState("");
+  async function submitReport(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setReportBusy(true); setReportMessage("");
+    try {
+      const response = await fetch("/api/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ listing_id: ad?.id, reason: reportReason, details: reportDetails, reporter_contact: reportContact }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "ثبت گزارش انجام نشد.");
+      setReportMessage(data.message || "گزارش ثبت شد."); setReportOpen(false); setReportDetails(""); setReportContact("");
+    } catch (err) { setReportMessage(err instanceof Error ? err.message : "خطا در ثبت گزارش"); }
+    finally { setReportBusy(false); }
+  }
   return <><Header /><main className="container min-h-[65vh] py-6 md:py-10">
     <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand"><ArrowRight size={18}/> بازگشت به آگهی‌ها</Link>
     {loading ? <div className="card p-12 text-center text-sm text-muted">در حال دریافت جزئیات آگهی...</div> :
@@ -58,6 +75,16 @@ export default function AdDetailPage() {
         </div>}
         <div className="rounded-2xl bg-[#fff8ef] p-4 text-xs leading-7 text-gray-600"><div className="mb-1 flex items-center gap-2 font-bold text-[#18343c]"><ShieldCheck size={17}/> نکته ایمنی سه‌سوته</div>قبل از پرداخت، کالا یا ملک را حضوری بررسی کن و از واریز بیعانه بدون اطمینان خودداری کن.</div>
         {!ad.contact_phone && <p className="mt-4 text-center text-xs leading-6 text-muted">برای این آگهی شماره تماسی ثبت نشده است.</p>}
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <button type="button" onClick={() => { setReportOpen(v => !v); setReportMessage(""); }} className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">گزارش آگهی مشکوک یا خلاف قوانین</button>
+          {reportOpen && <form onSubmit={submitReport} className="mt-3 space-y-3 rounded-xl bg-gray-50 p-4">
+            <label className="block text-sm font-bold">دلیل گزارش<select value={reportReason} onChange={e=>setReportReason(e.target.value)} className="field mt-2"><option value="fraud">احتمال کلاهبرداری</option><option value="wrong_info">اطلاعات نادرست</option><option value="prohibited">محتوای ممنوع</option><option value="duplicate">آگهی تکراری</option><option value="other">سایر موارد</option></select></label>
+            <label className="block text-sm font-bold">توضیحات (اختیاری)<textarea value={reportDetails} onChange={e=>setReportDetails(e.target.value)} maxLength={1500} className="field mt-2 min-h-24" placeholder="جزئیات مشکل را بنویس..."/></label>
+            <label className="block text-sm font-bold">راه تماس برای پیگیری (اختیاری)<input value={reportContact} onChange={e=>setReportContact(e.target.value)} maxLength={100} className="field mt-2" placeholder="شماره یا ایمیل"/></label>
+            <button disabled={reportBusy} className="btn btn-primary w-full disabled:opacity-60">{reportBusy ? "در حال ثبت..." : "ارسال گزارش"}</button>
+          </form>}
+          {reportMessage && <p role="status" className="mt-3 rounded-lg bg-orange-50 p-3 text-xs leading-6">{reportMessage}</p>}
+        </div>
       </aside>
     </div>}
   </main></>;
