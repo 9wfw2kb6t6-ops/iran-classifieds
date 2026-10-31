@@ -6,7 +6,7 @@ const cities = ["تهران","کرج","اصفهان","شیراز","تبریز","
 const categories = ["املاک","خودرو","موبایل و دیجیتال","خانه و آشپزخانه","استخدام و کاریابی","خدمات","وسایل شخصی","ورزش و سرگرمی"];
 
 export default function PostAd() {
-  const [form, setForm] = useState({ title: "", category: "", price_toman: "", city: "", description: "" });
+  const [form, setForm] = useState({ title: "", category: "", price_toman: "", city: "", description: "", contact_phone: "" });
   const [images, setImages] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -37,7 +37,7 @@ export default function PostAd() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "ثبت آگهی انجام نشد.");
       setMessage(result.message || "آگهی با موفقیت ثبت شد.");
-      setForm({ title: "", category: "", price_toman: "", city: "", description: "" });
+      setForm({ title: "", category: "", price_toman: "", city: "", description: "", contact_phone: "" });
       setImages([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "ارتباط با سرور برقرار نشد.");
@@ -51,14 +51,12 @@ export default function PostAd() {
       <label className="block text-sm font-bold">دسته‌بندی<select required value={form.category} onChange={e=>update("category",e.target.value)} className="field mt-2"><option value="">انتخاب دسته‌بندی</option>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
       <label className="block text-sm font-bold">قیمت (تومان)<input inputMode="numeric" value={form.price_toman} onChange={e=>update("price_toman",e.target.value)} className="field mt-2" placeholder="برای کالای رایگان یا توافقی خالی بگذار"/></label>
       <label className="block text-sm font-bold">شهر<select required value={form.city} onChange={e=>update("city",e.target.value)} className="field mt-2"><option value="">انتخاب شهر</option>{cities.map(x=><option key={x}>{x}</option>)}</select></label>
+      <label className="block text-sm font-bold">شماره تماس آگهی‌دهنده<input required type="tel" inputMode="tel" dir="ltr" maxLength={13} value={form.contact_phone} onChange={e=>update("contact_phone",e.target.value)} className="field mt-2 text-left" placeholder="09123456789"/><span className="mt-1 block text-xs font-normal text-muted">این شماره پس از تأیید آگهی برای بازدیدکنندگان نمایش داده می‌شود.</span></label>
       <label className="block text-sm font-bold">توضیحات<textarea required minLength={10} maxLength={4000} value={form.description} onChange={e=>update("description",e.target.value)} className="field mt-2 min-h-32" placeholder="هر چیزی که خریدار باید درباره آگهی بداند..."/></label>
       <div className="rounded-2xl border border-dashed border-orange-300 bg-orange-50/60 p-4">
         <div className="font-bold text-sm">عکس‌های آگهی <span className="font-normal text-muted">(حداکثر ۴ عکس)</span></div>
         <p className="mt-1 text-xs text-muted">JPG، PNG یا WEBP؛ حداکثر ۵ مگابایت برای هر عکس</p>
-        <label className="mt-3 flex cursor-pointer items-center justify-center rounded-xl bg-white px-4 py-4 text-sm font-bold text-brand ring-1 ring-orange-200">
-          انتخاب عکس از گوشی
-          <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={e=>{chooseImages(e.target.files);e.currentTarget.value="";}}/>
-        </label>
+        <label className="mt-3 flex cursor-pointer items-center justify-center rounded-xl bg-white px-4 py-4 text-sm font-bold text-brand ring-1 ring-orange-200">انتخاب عکس از گوشی<input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={e=>{chooseImages(e.target.files);e.currentTarget.value="";}}/></label>
         {previews.length > 0 && <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">{previews.map((src,index)=><div key={src} className="relative overflow-hidden rounded-xl border bg-white"><img src={src} alt={"پیش‌نمایش عکس " + (index+1)} className="aspect-square w-full object-cover"/><button type="button" onClick={()=>setImages(current=>current.filter((_,i)=>i!==index))} className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-1 text-xs text-white">حذف</button></div>)}</div>}
       </div>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
