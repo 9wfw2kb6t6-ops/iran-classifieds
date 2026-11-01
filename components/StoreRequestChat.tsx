@@ -1,0 +1,11 @@
+"use client";
+import {useEffect,useState} from "react";
+type Message={id:number;sender_role:"user"|"admin";body:string;created_at:string};
+export default function StoreRequestChat({requestId,admin=false}:{requestId:number;admin?:boolean}){
+ const [messages,setMessages]=useState<Message[]>([]),[body,setBody]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+ const endpoint=admin?"/api/admin/store-builder-messages":"/api/account/store-builder-messages";
+ async function load(){const r=await fetch(endpoint+"?request_id="+requestId,{cache:"no-store"});const d=await r.json();if(!r.ok)throw Error(d.error||"دریافت پیام‌ها ناموفق بود");setMessages(d.messages||[]);}
+ useEffect(()=>{load().catch(e=>setError(e.message));},[requestId]);
+ async function send(e:React.FormEvent){e.preventDefault();if(!body.trim())return;setBusy(true);setError("");try{const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({request_id:requestId,body})});const d=await r.json();if(!r.ok)throw Error(d.error||"ارسال پیام ناموفق بود");setBody("");await load();}catch(e){setError(e instanceof Error?e.message:"خطا");}finally{setBusy(false);}}
+ return <section className="mt-4 rounded-xl border border-orange-100 bg-orange-50/50 p-3"><h3 className="font-black text-sm">گفت‌وگو درباره درخواست</h3><div className="mt-3 grid gap-2">{messages.map(m=><div key={m.id} className={"max-w-[90%] rounded-xl p-3 text-sm "+(m.sender_role===(admin?"admin":"user")?"mr-auto bg-white":"ml-auto bg-orange-100")}><b className="block mb-1 text-xs">{m.sender_role==="admin"?"مدیریت سه‌سوته":"مشتری"}</b><p className="whitespace-pre-wrap break-words">{m.body}</p><time className="mt-1 block text-[10px] text-gray-500">{new Date(m.created_at).toLocaleString("fa-IR")}</time></div>)}{!messages.length&&<p className="text-xs text-muted">هنوز پیامی ثبت نشده است.</p>}</div>{error&&<p className="mt-2 text-xs text-red-600">{error}</p>}<form onSubmit={send} className="mt-3 flex flex-col gap-2"><textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={4000} rows={2} placeholder="پیام خود را بنویسید..." className="w-full rounded-xl border bg-white p-3 text-sm" required/><button disabled={busy||!body.trim()} className="btn btn-primary self-start">{busy?"در حال ارسال...":"ارسال پیام"}</button></form></section>;
+}
