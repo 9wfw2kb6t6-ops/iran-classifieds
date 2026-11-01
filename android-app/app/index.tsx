@@ -26,7 +26,7 @@ export default function HomeScreen(){
  {error?<Pressable onPress={()=>{setLoading(true);void load();}}><Text style={{textAlign:"center",color:"#B42318",padding:12}}>{error} · تلاش دوباره</Text></Pressable>:null}
  {loading?<ActivityIndicator color={O} size="large" style={{margin:25}}/>:null}
  </>}
- renderItem={({item})=><Pressable onPress={()=>router.push("/ads/"+item.id)} style={{flex:1,backgroundColor:"white",borderRadius:14,overflow:"hidden",borderWidth:1,borderColor:"#F0E9DF"}}>
+ renderItem={({item})=><Pressable onPress={()=>router.push(("/ads/"+item.id) as never)} style={{flex:1,backgroundColor:"white",borderRadius:14,overflow:"hidden",borderWidth:1,borderColor:"#F0E9DF"}}>
  {item.image_urls?.[0]?<Image source={{uri:item.image_urls[0]}} style={{width:"100%",height:125,backgroundColor:"#F1ECE5"}} resizeMode="cover"/>:<View style={{height:125,backgroundColor:"#F1ECE5",alignItems:"center",justifyContent:"center"}}><Text style={{color:"#999"}}>بدون تصویر</Text></View>}
  <View style={{padding:10}}><Text numberOfLines={2} style={{color:I,textAlign:"right",fontSize:13,fontWeight:"800",minHeight:38}}>{item.title}</Text><Text style={{color:O,textAlign:"right",fontWeight:"900",marginTop:8,fontSize:12}}>{money(item.price_toman)}</Text><Text style={{color:"#818181",textAlign:"right",fontSize:11,marginTop:5}}>{item.city||"ایران"} · {item.category||"آگهی"}</Text>{item.is_featured?<Text style={{color:"#9A6500",textAlign:"right",fontSize:10,marginTop:5}}>★ آگهی ویژه</Text>:null}</View></Pressable>}
  ListEmptyComponent={!loading&&!error?<Text style={{textAlign:"center",color:"#777",marginTop:30}}>آگهی‌ای با این مشخصات پیدا نشد.</Text>:null}/>
