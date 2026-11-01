@@ -2,6 +2,7 @@ import * as SecureStore from "expo-secure-store";
 
 export const API_BASE_URL = "https://iran-classifieds.vercel.app";
 const TOKEN_KEY = "se_sote_session";
+const englishDigits=(value:string)=>value.replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[٬,\\s]/g,"");
 export type Listing = {
   id: number | string; title: string; description?: string;
   price_toman?: number | string | null; city?: string; category?: string;
@@ -39,8 +40,9 @@ async function json<T>(path: string, init?: RequestInit): Promise<T> {
 }
 export async function getListings(filters: { q?: string; city?: string; category?: string; min_price?: string; max_price?: string } = {}): Promise<Listing[]> {
   const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key,value])=>{if(value?.trim())params.set(key,value.trim());});
-  const data = await json<{ listings: Listing[] }>("/api/listings" + (params.size ? "?" + params.toString() : ""));
+  Object.entries(filters).forEach(([key,value])=>{if(value?.trim())params.set(key,key==="min_price"||key==="max_price"?englishDigits(value):value.trim());});
+  const query=params.toString();
+  const data = await json<{ listings: Listing[] }>("/api/listings" + (query ? "?" + query : ""));
   return Array.isArray(data.listings) ? data.listings : [];
 }
 export async function getListing(id: string): Promise<Listing> {
