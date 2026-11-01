@@ -6,6 +6,7 @@ export async function adminLogin(password:string){
  const d=await r.json();if(!r.ok||!d.session_token)throw new Error(d.error||"ورود مدیر انجام نشد.");
  await SecureStore.setItemAsync(KEY,d.session_token);
 }
+export async function hasAdminSession(){ return Boolean(await SecureStore.getItemAsync(KEY)); }
 export async function adminLogout(){
  try{await adminFetch("/api/admin/logout",{method:"POST"});}finally{await SecureStore.deleteItemAsync(KEY);}
 }
