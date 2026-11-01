@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
     const minPrice = minRaw ? Number(minRaw) : null;
     const maxPrice = maxRaw ? Number(maxRaw) : null;
     const rows = await sql`
-      SELECT l.id, l.title, l.description, l.price_toman, l.city, l.category, l.image_urls, l.created_at, l.is_featured,
+      SELECT l.id, l.title, l.description, l.price_toman, l.city, l.category, l.image_urls, l.created_at,
+             (l.is_featured AND l.featured_until > NOW()) AS is_featured,
              EXISTS (SELECT 1 FROM promotion_requests pr WHERE pr.listing_id = l.id AND pr.promotion_type = 'bump' AND pr.status = 'approved') AS is_bumped
       FROM listings l
       WHERE status = 'published'
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
         AND (${category} = '' OR category = ${category})
         AND (${minPrice}::bigint IS NULL OR price_toman >= ${minPrice})
         AND (${maxPrice}::bigint IS NULL OR price_toman <= ${maxPrice})
-      ORDER BY is_featured DESC, created_at DESC
+      ORDER BY (l.is_featured AND l.featured_until > NOW()) DESC, l.created_at DESC
       LIMIT 60
     `;
     return NextResponse.json({ listings: rows });
