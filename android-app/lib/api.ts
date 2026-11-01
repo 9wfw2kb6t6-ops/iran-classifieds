@@ -9,6 +9,17 @@ export type Listing = {
   contact_phone?: string; created_at?: string;
 };
 export type User = { id: number; phone: string; display_name: string | null };
+export type WalletData = {
+  balance: number;
+  packages: { code: string; title: string; amount: number }[];
+  transactions: { id: number; amount_toman: number; transaction_type: string; description: string; created_at: string }[];
+  requests: { id: number; package_code: string; amount_toman: number; status: string; requested_at: string; admin_note?: string }[];
+};
+export type PromotionData = {
+  requests: { id: number; listing_id: number; promotion_type: string; status: string; requested_at: string; title: string; admin_note?: string }[];
+  balance: number;
+  prices: { featured: number; bump: number };
+};
 async function token() { return SecureStore.getItemAsync(TOKEN_KEY); }
 export async function saveSession(value: string) { await SecureStore.setItemAsync(TOKEN_KEY, value); }
 export async function clearSession() { await SecureStore.deleteItemAsync(TOKEN_KEY); }
@@ -26,8 +37,10 @@ async function json<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) throw new Error(data.error || "ارتباط با سه‌سوته انجام نشد.");
   return data as T;
 }
-export async function getListings(query = ""): Promise<Listing[]> {
-  const data = await json<{ listings: Listing[] }>("/api/listings" + (query ? "?q=" + encodeURIComponent(query) : ""));
+export async function getListings(filters: { q?: string; city?: string; category?: string; min_price?: string; max_price?: string } = {}): Promise<Listing[]> {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key,value])=>{if(value?.trim())params.set(key,value.trim());});
+  const data = await json<{ listings: Listing[] }>("/api/listings" + (params.size ? "?" + params.toString() : ""));
   return Array.isArray(data.listings) ? data.listings : [];
 }
 export async function getListing(id: string): Promise<Listing> {
@@ -83,9 +96,11 @@ export async function updateListing(id: number, body: Record<string, unknown>) {
 export async function deleteListing(id: number) {
   return json<{ success: boolean }>("/api/account/listings/" + id, { method: "DELETE" });
 }
-export async function getWallet() {
-  return json<{ balance: number; packages: {code:string;title:string;amount:number}[]; transactions: unknown[]; requests: unknown[] }>("/api/account/wallet");
+export async function getWallet() { return json<WalletData>("/api/account/wallet"); }
+export async function requestWalletTopup(package_code: string) {
+  return json<{success:boolean;message:string;request:WalletData["requests"][number]}>("/api/account/wallet",{method:"POST",body:JSON.stringify({package_code})});
 }
-export async function getPromotions() {
-  return json<{ requests: unknown[]; balance: number; prices: {featured:number;bump:number} }>("/api/account/promotions");
+export async function getPromotions() { return json<PromotionData>("/api/account/promotions"); }
+export async function requestPromotion(listing_id:number,promotion_type:"featured"|"bump") {
+  return json<{success:boolean;message:string}>("/api/account/promotions",{method:"POST",body:JSON.stringify({listing_id,promotion_type})});
 }
