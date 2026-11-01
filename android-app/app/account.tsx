@@ -30,9 +30,11 @@ export default function AccountScreen(){
   <Pressable onPress={signOut} style={{alignSelf:"flex-end",marginTop:14,backgroundColor:"#FFFFFF20",paddingHorizontal:14,paddingVertical:9,borderRadius:10}}><Text style={{color:"white",fontWeight:"700"}}>خروج از حساب</Text></Pressable>
  </View>
  <View style={{flexDirection:"row",gap:8,marginTop:14}}>
+  <Pressable onPress={()=>router.push("/store-builder")} style={{flex:1,backgroundColor:"white",padding:13,borderRadius:12}}><Text style={{textAlign:"center",fontWeight:"800",color:INK}}>فروشگاه‌ساز</Text></Pressable>
   <Pressable onPress={()=>router.push("/wallet")} style={{flex:1,backgroundColor:"white",padding:13,borderRadius:12}}><Text style={{textAlign:"center",fontWeight:"800",color:INK}}>کیف پول</Text></Pressable>
-  <Pressable onPress={()=>router.push("/promotions")} style={{flex:1,backgroundColor:"white",padding:13,borderRadius:12}}><Text style={{textAlign:"center",fontWeight:"800",color:INK}}>ویژه‌سازی آگهی</Text></Pressable>
+  <Pressable onPress={()=>router.push("/promotions")} style={{flex:1,backgroundColor:"white",padding:13,borderRadius:12}}><Text style={{textAlign:"center",fontWeight:"800",color:INK}}>ویژه‌سازی</Text></Pressable>
  </View>
+ 
  <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginTop:25}}>
   <Text style={{color:ORANGE,fontWeight:"800"}}>{items.length.toLocaleString("fa-IR")} آگهی</Text>
   <Text style={{fontSize:19,fontWeight:"900",color:INK}}>آگهی‌های من</Text>
