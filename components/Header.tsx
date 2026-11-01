@@ -22,6 +22,7 @@ export default function Header() {
       </div>
     </div>
     <nav className="flex items-center gap-2 overflow-x-auto border-t border-[#eee6dd] px-4 py-2 text-xs font-bold text-[#526268] md:hidden">
+      <Link href="/account" className="shrink-0 rounded-lg bg-[#18343c] px-3 py-2 text-white">ورود | ثبت‌نام</Link>
       <Link href="/store-builder" className="shrink-0 rounded-lg bg-[#fff0e6] px-3 py-2 text-[#d85f24]">فروشگاه‌ساز</Link>
       <Link href="/terms" className="shrink-0 px-2 py-2">قوانین</Link>
       <Link href="/privacy" className="shrink-0 px-2 py-2">حریم خصوصی</Link>
