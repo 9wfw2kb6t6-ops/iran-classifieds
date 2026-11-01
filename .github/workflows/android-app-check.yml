@@ -1,0 +1,29 @@
+name: Android app validation
+on:
+  push:
+    paths:
+      - "android-app/**"
+      - ".github/workflows/android-app-check.yml"
+  pull_request:
+    paths:
+      - "android-app/**"
+      - ".github/workflows/android-app-check.yml"
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android-app/package.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check
+        run: npm run typecheck
+      - name: Expo Android bundle check
+        run: npx expo export --platform android
