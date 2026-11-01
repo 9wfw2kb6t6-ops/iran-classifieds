@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "سه‌سوته",
+    "slug": "se-sote",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "sesote",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "android": {
+      "package": "ir.sesote.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF8EF"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
