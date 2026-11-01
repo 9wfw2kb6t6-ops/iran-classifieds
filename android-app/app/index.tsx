@@ -6,7 +6,7 @@ const O="#F47735",I="#18343C",C="#FFF8EF";
 const cats=["همه","املاک","خودرو","موبایل و دیجیتال","خانه و آشپزخانه","استخدام و کاریابی","خدمات","وسایل شخصی","ورزش و سرگرمی"];
 const money=(v?:number|string|null)=>!v||Number(v)===0?"توافقی":Number(v).toLocaleString("fa-IR")+" تومان";
 export default function HomeScreen(){
- const router=useRouter(),[items,setItems]=useState<Listing[]>([]),[query,setQuery]=useState(""),[city,setCity]=useState(""),[category,setCategory]=useState("همه"),[loading,setLoading]=useState(true),[error,setError]=useState("");
+ const router=useRouter(),[items,setItems]=useState<Listing[]>([]),[query,setQuery]=useState(""),[city,setCity]=useState(""),[minPrice,setMinPrice]=useState(""),[maxPrice,setMaxPrice]=useState(""),[category,setCategory]=useState("همه"),[loading,setLoading]=useState(true),[error,setError]=useState("");
  const load=useCallback(async()=>{try{setError("");setItems(await getListings({q:query,city,min_price:minPrice,max_price:maxPrice,category:category==="همه"?"":category}));}catch(e){setError(e instanceof Error?e.message:"اتصال برقرار نشد.");}finally{setLoading(false);}},[query,city,minPrice,maxPrice,category]);
  useEffect(()=>{void load();},[load]);
  return <SafeAreaView style={{flex:1,backgroundColor:C}}>
