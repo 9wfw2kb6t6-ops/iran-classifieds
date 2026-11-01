@@ -1,0 +1,35 @@
+name: Website build validation
+on:
+  push:
+    paths:
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "data/**"
+      - "tsconfig.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/site-build-check.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "data/**"
+      - "tsconfig.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/site-build-check.yml"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build website
+        run: npm run build
