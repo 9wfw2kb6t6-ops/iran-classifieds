@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "رمز ورود نادرست است." }, { status: 401 });
     }
     const session = createAdminSession();
-    const response = NextResponse.json({ success: true });
+    const mobileClient = request.headers.get("x-client-app") === "se-sote-mobile";
+    const response = NextResponse.json({ success: true, ...(mobileClient ? { session_token: session.value } : {}) });
     response.cookies.set(adminCookieName, session.value, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
