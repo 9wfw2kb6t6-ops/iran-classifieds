@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import StoreRequestChat from "@/components/StoreRequestChat";
 
-const labels: Record<string,string> = { pending:"در انتظار بررسی", contacted:"تماس گرفته شد", quoted:"قیمت اعلام شد", pending_deposit:"در انتظار پیش‌پرداخت", deposit_confirmed:"پیش‌پرداخت تأیید شد", paid:"تسویه کامل", building:"در حال طراحی و ساخت", customer_review:"منتظر تأیید مشتری", revision:"نیازمند اصلاح", delivered:"تحویل نهایی شد", rejected:"رد شد" };
+const labels: Record<string,string> = { pending:"در انتظار بررسی", contacted:"تماس گرفته شد", quoted:"قیمت اعلام شد", awaiting_deposit:"در انتظار پیش‌پرداخت", deposit_confirmed:"پیش‌پرداخت تأیید شد", paid:"تسویه کامل", building:"در حال طراحی و ساخت", customer_review:"منتظر تأیید مشتری", revision:"نیازمند اصلاح", delivered:"تحویل نهایی شد", rejected:"رد شد" };
 const statuses = Object.keys(labels);
 
 export default function AdminStoreBuilderPage() {
