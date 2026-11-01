@@ -8,7 +8,13 @@
     "scheme": "sesote",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "برای انتخاب عکس و ثبت آگهی در سه‌سوته به دسترسی عکس‌ها نیاز داریم."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -23,6 +29,13 @@
     "extra": {
       "eas": {
         "projectId": ""
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "ir.sesote.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "برای انتخاب عکس و ثبت آگهی در سه‌سوته به دسترسی عکس‌ها نیاز داریم."
       }
     }
   }
