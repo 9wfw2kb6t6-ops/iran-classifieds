@@ -109,6 +109,10 @@ export default function AdminPage() {
           <div><div style={{ color: "#F47735", fontWeight: 900, fontSize: 14 }}>سه‌سوته</div><h1 style={{ margin: "4px 0", fontSize: 27 }}>پنل مدیریت</h1><p style={{ margin: 0, color: "#647579" }}>مدیریت آگهی‌های سایت</p></div>
           {loggedIn && <button onClick={logout} style={buttonStyle("#18343C")}>خروج</button>}
         </header>
+        {loggedIn && <nav aria-label="بخش‌های مدیریت" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 18 }}>
+          <a href="/admin/wallet" style={{ ...buttonStyle("#16758A"), textDecoration: "none", display: "inline-block" }}>کیف پول و درخواست‌های شارژ</a>
+          <a href="/admin/promotions" style={{ ...buttonStyle("#607579"), textDecoration: "none", display: "inline-block" }}>درخواست‌های ویژه‌سازی و نردبان</a>
+        </nav>}
         {message && <div role="status" style={{ padding: 13, borderRadius: 12, background: "#fff", marginBottom: 16 }}>{message}</div>}
         {!loggedIn ? (
           <form onSubmit={login} style={panelStyle}>
