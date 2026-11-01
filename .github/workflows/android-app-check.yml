@@ -27,3 +27,6 @@ jobs:
         run: npm run typecheck
       - name: Expo Android bundle check
         run: npx expo export --platform android
+
+      - name: Expo iOS bundle check
+        run: npx expo export --platform ios
