@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       ), eligible AS (
         SELECT l.id FROM listings l CROSS JOIN balance
         WHERE l.id=${listingId} AND l.user_id=${userId} AND l.status='published'
-          AND ( ${type} <> 'featured' OR l.is_featured = FALSE )
+          AND ( ${type} <> 'featured' OR l.is_featured = FALSE OR l.featured_until <= NOW() )
           AND balance.amount >= ${amount}
           AND NOT EXISTS (SELECT 1 FROM promotion_requests p WHERE p.listing_id=${listingId} AND p.promotion_type=${type} AND p.status='pending')
       ), debit AS (
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       SELECT created.*, (SELECT amount FROM balance) AS balance_before FROM created
     `;
     if (!rows.length) {
-      const info = await sql`SELECT l.status,l.is_featured,COALESCE((SELECT SUM(amount_toman) FROM wallet_transactions WHERE user_id=${userId}),0)::int AS balance FROM listings l WHERE l.id=${listingId} AND l.user_id=${userId}`;
+      const info = await sql`SELECT l.status,(l.is_featured AND l.featured_until > NOW()) AS is_featured,COALESCE((SELECT SUM(amount_toman) FROM wallet_transactions WHERE user_id=${userId}),0)::int AS balance FROM listings l WHERE l.id=${listingId} AND l.user_id=${userId}`;
       if (!info.length || info[0].status !== "published") return NextResponse.json({ error: "فقط آگهی منتشرشده خودتان قابل ارتقا است." }, { status: 400 });
       if (type === "featured" && info[0].is_featured) return NextResponse.json({ error: "این آگهی هم‌اکنون ویژه است." }, { status: 409 });
       const duplicate = await sql`SELECT id FROM promotion_requests WHERE listing_id=${listingId} AND promotion_type=${type} AND status='pending' LIMIT 1`;
