@@ -19,7 +19,7 @@ export default function AdminScreen(){
  const [tab,setTab]=useState<Tab>("pending"),[rows,setRows]=useState<Row[]>([]);
  const [notes,setNotes]=useState<Record<string,string>>({});
  const current=tabs.find(x=>x.id===tab)!;
- const load=useCallback(async()=>{setMessage("");try{const d=await adminJson<Record<string,Row[]>>(current.endpoint);setRows(d[current.key]||[]);}catch(e){setMessage(e instanceof Error?e.message:"دریافت اطلاعات انجام نشد.");setRows([]);}},[current]);
+ const load=useCallback(async()=>{setMessage("");try{const d=await adminJson<Record<string,Row[]>>(current.endpoint);setRows(d[current.key]||[]);}catch(e){const msg=e instanceof Error?e.message:"دریافت اطلاعات انجام نشد.";setMessage(msg);setRows([]);if(msg.includes("ابتدا وارد پنل مدیریت")){await adminLogout();setLogged(false);}}},[current]);
  useEffect(()=>{hasAdminSession().then(v=>{setLogged(v);setReady(true);});},[]);
  useEffect(()=>{if(logged)void load();},[logged,load]);
  async function login(){setBusy(true);setMessage("");try{await adminLogin(password);setPassword("");setLogged(true);}catch(e){setMessage(e instanceof Error?e.message:"ورود انجام نشد.");}finally{setBusy(false);}}
