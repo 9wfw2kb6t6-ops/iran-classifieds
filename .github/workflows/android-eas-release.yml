@@ -1,0 +1,36 @@
+name: SeSote signed Android release (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_profile:
+        description: EAS build profile
+        required: true
+        type: choice
+        options:
+          - production-apk
+          - production
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: android-app/package.json
+
+      - name: Install dependencies
+        working-directory: android-app
+        run: npm install
+
+      - name: Build signed Android app with EAS
+        working-directory: android-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx eas-cli@latest build --platform android --profile "${{ inputs.build_profile }}" --non-interactive
