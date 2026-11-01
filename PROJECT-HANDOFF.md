@@ -234,3 +234,11 @@ https://github.com/9wfw2kb6t6-ops/iran-classifieds
 - موجودی 100,000 تومان صرفاً داده آزمایشی در شاخه جداگانه است و ارزش نقدی ندارد.
 - کنترل production پس از seed: کاربر آزمایشی در production وجود ندارد؛ تعداد تراکنش‌های کیف پول production همچنان صفر و تعداد درخواست‌های ارتقا همان 2 باقی مانده است.
 - محدودیت: این مرحله فقط محیط و داده آزمایشی را آماده کرده است. endpoint واقعی از طریق نشست کاربر/ادمین هنوز اجرا نشده؛ برای تست واقعی باید deployment آزمایشی سایت به DATABASE_URL همین شاخه متصل شود و ورود آزمایشی از UI انجام شود. تا آن زمان هیچ درخواست ارتقایی در production ثبت نکنید.
+
+
+### اتصال Preview اختصاصی برای تست کیف پول — 2026-11-01
+- شاخه GitHub با نام `wallet-test` از main ساخته شد تا Preview مستقل Vercel ایجاد شود.
+- در پروژه Vercel `iran-classifieds`، متغیر حساس `DATABASE_URL` فقط برای target=preview و فقط برای gitBranch=`wallet-test` تنظیم شد.
+- مقدار آن به شاخه Neon آزمایشی `br-twilight-thunder-ba1yw5i0` اشاره می‌کند؛ مقدار secret در گزارش یا مخزن درج نشده است.
+- متغیر Production `DATABASE_URL` تغییر نکرد.
+- Preview هنوز ساخته نشده بود و پس از این commit باید وضعیت deployment بررسی شود.
