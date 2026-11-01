@@ -45,7 +45,7 @@ export default function AccountScreen(){
   <Text style={{textAlign:"right",fontSize:12,color:"#777",marginTop:5}}>{x.city} · {x.category}</Text>
   <View style={{flexDirection:"row",justifyContent:"space-between",marginTop:9}}><Text style={{fontSize:12,color:ORANGE,fontWeight:"800"}}>{money(x.price_toman)}</Text><Text style={{fontSize:12,color:"#666"}}>{status[String(x.status)]||x.status}</Text></View>
   <View style={{flexDirection:"row",gap:8,marginTop:13}}>
-   <Pressable onPress={()=>router.push("/ads/"+x.id)} style={{flex:1,borderWidth:1,borderColor:"#E8DED3",padding:10,borderRadius:9}}><Text style={{textAlign:"center",fontSize:12,fontWeight:"700",color:INK}}>مشاهده</Text></Pressable>
+   <Pressable onPress={()=>router.push(("/ads/"+x.id) as never)} style={{flex:1,borderWidth:1,borderColor:"#E8DED3",padding:10,borderRadius:9}}><Text style={{textAlign:"center",fontSize:12,fontWeight:"700",color:INK}}>مشاهده</Text></Pressable>
    {x.status==="published"&&<Pressable onPress={()=>markSold(Number(x.id))} style={{flex:1,borderWidth:1,borderColor:"#E8DED3",padding:10,borderRadius:9}}><Text style={{textAlign:"center",fontSize:12,fontWeight:"700",color:INK}}>فروخته شد</Text></Pressable>}
    <Pressable onPress={()=>remove(Number(x.id))} style={{flex:1,borderWidth:1,borderColor:"#F2C7C3",padding:10,borderRadius:9}}><Text style={{textAlign:"center",fontSize:12,fontWeight:"700",color:"#B42318"}}>حذف</Text></Pressable>
   </View>
