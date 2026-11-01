@@ -25,6 +25,13 @@ export async function PATCH(request:NextRequest){
    WITH changed AS (
     UPDATE promotion_requests SET status=${decision},reviewed_at=NOW(),admin_note=${note||null}
     WHERE id=${id} AND status='pending'
+      AND (
+        ${decision}='rejected'
+        OR EXISTS (
+          SELECT 1 FROM listings l
+          WHERE l.id=promotion_requests.listing_id AND l.status='published'
+        )
+      )
     RETURNING id,user_id,listing_id,promotion_type
    ), effect AS (
     UPDATE listings l SET
@@ -39,7 +46,11 @@ export async function PATCH(request:NextRequest){
    )
    SELECT c.id,c.promotion_type,(SELECT COUNT(*) FROM refunded) AS refunded_count FROM changed c
   `;
-  if(!rows.length)return NextResponse.json({error:"درخواست پیدا نشد یا قبلاً بررسی شده است."},{status:404});
+  if(!rows.length){
+   const pending=await sql`SELECT p.id FROM promotion_requests p WHERE p.id=${id} AND p.status='pending'`;
+   if(pending.length)return NextResponse.json({error:"این آگهی دیگر منتشرشده نیست؛ درخواست ارتقا تأیید نشد و وجه در کیف پول باقی ماند."},{status:409});
+   return NextResponse.json({error:"درخواست پیدا نشد یا قبلاً بررسی شده است."},{status:404});
+  }
   return NextResponse.json({success:true,request:rows[0],message:decision==="rejected"?"درخواست رد شد و هزینه به کیف پول برگشت.":"درخواست تأیید شد."});
  }catch(error){console.error("ADMIN_PROMOTIONS_PATCH_ERROR",error);return NextResponse.json({error:"ثبت نتیجه بررسی انجام نشد."},{status:500});}
 }
