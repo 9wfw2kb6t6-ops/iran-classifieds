@@ -1,5 +1,5 @@
 import { useCallback,useEffect,useState } from "react";
-import { ActivityIndicator,Alert,Pressable,SafeAreaView,ScrollView,Text,TextInput,View } from "react-native";
+import { ActivityIndicator,Alert,Linking,Pressable,SafeAreaView,ScrollView,Text,TextInput,View } from "react-native";
 import { useRouter } from "expo-router";
 import { getAccount } from "../lib/api";
 import { createStoreBuilderRequest,getStoreMessages,reviewStoreRequest,sendStoreMessage,StoreBuilderRequest,StoreMessage } from "../lib/store-builder-api";
@@ -40,7 +40,7 @@ export default function StoreBuilderScreen(){
  <Text style={{textAlign:"right",fontSize:12,color:O,fontWeight:"800",marginTop:7}}>{status[x.status]||x.status}</Text>
  <Text style={{textAlign:"right",fontSize:12,color:"#666",marginTop:6}}>قیمت اعلام‌شده: {money(x.quoted_price_toman)} · پیش‌پرداخت: {money(x.prepayment_amount_toman)}</Text>
  {x.admin_note?<Text style={{textAlign:"right",fontSize:12,color:"#777",marginTop:7}}>یادداشت مدیر: {x.admin_note}</Text>:null}
- {x.deliverable_url?<Pressable onPress={()=>router.push({pathname:"/store-builder",params:{url:x.deliverable_url}} as never)}><Text style={{textAlign:"right",color:O,fontWeight:"800",marginTop:7}}>لینک تحویل: {x.deliverable_url}</Text></Pressable>:null}
+ {x.deliverable_url?<Pressable onPress={()=>x.deliverable_url&&Linking.openURL(x.deliverable_url)}><Text style={{textAlign:"right",color:O,fontWeight:"800",marginTop:7}}>لینک تحویل: {x.deliverable_url}</Text></Pressable>:null}
  <Pressable onPress={()=>void openMessages(x.id)} style={{backgroundColor:"#F3F0EA",padding:11,borderRadius:9,marginTop:11}}><Text style={{textAlign:"center",fontWeight:"800",color:I}}>گفت‌وگو با تیم سه‌سوته</Text></Pressable>
  {active===x.id?<View style={{marginTop:10,backgroundColor:"#FFF8EF",borderRadius:10,padding:10}}>
  {messages.map(m=><View key={m.id} style={{alignSelf:m.sender_role==="user"?"flex-start":"flex-end",backgroundColor:m.sender_role==="user"?"#E7F1F2":"white",padding:9,borderRadius:9,maxWidth:"90%",marginTop:5}}><Text style={{textAlign:"right",fontSize:12,color:I}}>{m.body}</Text></View>)}
