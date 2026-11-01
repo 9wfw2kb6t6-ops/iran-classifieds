@@ -4,7 +4,7 @@ import { isAdminSessionValid } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const STATUSES = ["pending", "contacted", "quoted", "paid", "building", "delivered", "rejected"];
+const STATUSES = ["pending", "contacted", "quoted", "pending_deposit", "deposit_confirmed", "paid", "building", "customer_review", "revision", "delivered", "rejected"];
 
 function unauthorized() {
   return NextResponse.json({ error: "ابتدا وارد پنل مدیریت شوید." }, { status: 401 });
