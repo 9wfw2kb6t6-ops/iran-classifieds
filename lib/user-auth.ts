@@ -14,6 +14,18 @@ function secret() {
 function sign(value: string) {
   return createHmac("sha256", secret()).update(value).digest("hex");
 }
+function verifySessionToken(token: string): number | null {
+  try {
+    const [id, expires, signature, extra] = token.split(".");
+    if (!id || !expires || !signature || extra || !/^\d+$/.test(id) || !/^\d+$/.test(expires)) return null;
+    if (Number(expires) <= Math.floor(Date.now() / 1000)) return null;
+    const expected = Buffer.from(sign(id + "." + expires));
+    const actual = Buffer.from(signature);
+    if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
+    const userId = Number(id);
+    return Number.isSafeInteger(userId) && userId > 0 ? userId : null;
+  } catch { return null; }
+}
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const derived = await scrypt(password, salt, 64) as Buffer;
@@ -32,17 +44,13 @@ export function createUserSession(userId: number) {
   return { value: payload + "." + sign(payload), maxAge: MAX_AGE };
 }
 export function getUserIdFromRequest(request: NextRequest): number | null {
-  try {
-    const token = request.cookies.get(COOKIE_NAME)?.value || "";
-    const [id, expires, signature, extra] = token.split(".");
-    if (!id || !expires || !signature || extra || !/^\d+$/.test(id) || !/^\d+$/.test(expires)) return null;
-    if (Number(expires) <= Math.floor(Date.now() / 1000)) return null;
-    const payload = id + "." + expires;
-    const expected = Buffer.from(sign(payload));
-    const actual = Buffer.from(signature);
-    if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
-    return Number(id);
-  } catch { return null; }
+  const authorization = request.headers.get("authorization") || "";
+  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (bearer) {
+    const userId = verifySessionToken(bearer);
+    if (userId) return userId;
+  }
+  return verifySessionToken(request.cookies.get(COOKIE_NAME)?.value || "");
 }
 export function setUserCookie(response: NextResponse, value: string, maxAge: number) {
   response.cookies.set(COOKIE_NAME, value, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge });
