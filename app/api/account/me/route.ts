@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     `;
     // Use the account phone as a safe fallback for older rows while keeping ownership scoped to this account.
     const listings = await sql`
-      SELECT id, title, description, price_toman, city, category, contact_phone, status, created_at, image_urls
+      SELECT id, title, description, price_toman, city, category, contact_phone, status, created_at, image_urls,
+             (is_featured AND featured_until > NOW()) AS is_featured, featured_until
       FROM listings
       WHERE user_id = ${userId} OR contact_phone = ${rows[0].phone}
       ORDER BY created_at DESC
