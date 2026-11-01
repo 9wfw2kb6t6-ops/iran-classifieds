@@ -36,6 +36,7 @@ export async function PATCH(request:NextRequest){
    ), effect AS (
     UPDATE listings l SET
       is_featured=CASE WHEN ${decision}='approved' AND c.promotion_type='featured' THEN TRUE ELSE l.is_featured END,
+      featured_until=CASE WHEN ${decision}='approved' AND c.promotion_type='featured' THEN NOW() + INTERVAL '7 days' ELSE l.featured_until END,
       created_at=CASE WHEN ${decision}='approved' AND c.promotion_type='bump' THEN NOW() ELSE l.created_at END
     FROM changed c WHERE l.id=c.listing_id AND l.status='published'
     RETURNING l.id
