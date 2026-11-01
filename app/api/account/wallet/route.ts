@@ -37,13 +37,22 @@ export async function POST(request: NextRequest) {
     const selected = PACKAGES.find(item => item.code === String(body.package_code || ""));
     if (!selected) return NextResponse.json({ error: "بسته انتخاب‌شده معتبر نیست." }, { status: 400 });
     const sql = neon(process.env.DATABASE_URL!);
-    const pending = await sql`SELECT id FROM wallet_topup_requests WHERE user_id = ${userId} AND status = 'pending' LIMIT 1`;
-    if (pending.length) return NextResponse.json({ error: "یک درخواست شارژ در انتظار بررسی دارید." }, { status: 409 });
     const rows = await sql`
+      WITH user_lock AS MATERIALIZED (
+        SELECT pg_advisory_xact_lock(${userId}::bigint)
+      )
       INSERT INTO wallet_topup_requests (user_id, package_code, amount_toman)
-      VALUES (${userId}, ${selected.code}, ${selected.amount})
+      SELECT ${userId}, ${selected.code}, ${selected.amount}
+      FROM user_lock
+      WHERE NOT EXISTS (
+        SELECT 1 FROM wallet_topup_requests
+        WHERE user_id = ${userId} AND status = 'pending'
+      )
       RETURNING id, package_code, amount_toman, status, requested_at
     `;
+    if (!rows.length) {
+      return NextResponse.json({ error: "یک درخواست شارژ در انتظار بررسی دارید." }, { status: 409 });
+    }
     return NextResponse.json({ success: true, request: rows[0], message: "درخواست شارژ آزمایشی ثبت شد. تا زمان تأیید مدیر و راه‌اندازی درگاه، پرداختی انجام ندهید." }, { status: 201 });
   } catch (error) {
     console.error("WALLET_TOPUP_POST_ERROR", error);
