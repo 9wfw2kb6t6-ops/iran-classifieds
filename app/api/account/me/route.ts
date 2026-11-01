@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC
       LIMIT 100
     `;
-    const storeBuilderRequests = await sql`SELECT id,business_name,contact_phone,store_model,plan_code,description,status,quoted_price_toman,prepayment_amount_toman,prepayment_confirmed_at,admin_note,requested_at,updated_at FROM store_builder_requests WHERE user_id = ${userId} ORDER BY requested_at DESC LIMIT 100`;
+    const storeBuilderRequests = await sql`SELECT id,business_name,contact_phone,store_model,plan_code,description,status,quoted_price_toman,prepayment_amount_toman,prepayment_confirmed_at,customer_feedback,customer_approved_at,admin_note,requested_at,updated_at FROM store_builder_requests WHERE user_id = ${userId} ORDER BY requested_at DESC LIMIT 100`;
     return NextResponse.json({ user: rows[0], listings, store_builder_requests: storeBuilderRequests });
   } catch (error) {
     console.error("ACCOUNT_ME_ERROR", error);
