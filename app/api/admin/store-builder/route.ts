@@ -14,7 +14,7 @@ export async function GET() {
   if (!isAdminSessionValid()) return unauthorized();
   try {
     const sql = neon(process.env.DATABASE_URL!);
-    const requests = await sql`SELECT r.id,r.business_name,r.contact_phone,r.store_model,r.plan_code,r.description,r.status,r.quoted_price_toman,r.prepayment_amount_toman,r.prepayment_confirmed_at,r.admin_note,r.requested_at,r.updated_at,r.user_id
+    const requests = await sql`SELECT r.id,r.business_name,r.contact_phone,r.store_model,r.plan_code,r.description,r.status,r.quoted_price_toman,r.prepayment_amount_toman,r.prepayment_confirmed_at,r.customer_feedback,r.customer_approved_at,r.admin_note,r.requested_at,r.updated_at,r.user_id
       FROM store_builder_requests r
       ORDER BY CASE WHEN r.status='pending' THEN 0 ELSE 1 END, r.requested_at DESC LIMIT 300`;
     return NextResponse.json({ requests, statuses: STATUSES });
