@@ -17,14 +17,17 @@ export async function POST(request: NextRequest) {
     const displayName = String(body.display_name || "").trim().slice(0, 80);
     if (!/^09\d{9}$/.test(phone)) return NextResponse.json({ error: "شماره موبایل ایران معتبر نیست." }, { status: 400 });
     if (password.length < 8 || password.length > 128) return NextResponse.json({ error: "رمز عبور باید حداقل ۸ و حداکثر ۱۲۸ کاراکتر باشد." }, { status: 400 });
-    const sql = neon(process.env.DATABASE_URL!);
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) return NextResponse.json({ error: "پایگاه داده در دسترس نیست." }, { status: 503 });
+    const sql = neon(databaseUrl);
     const existing = await sql`SELECT id FROM users WHERE phone = ${phone} LIMIT 1`;
     if (existing.length) return NextResponse.json({ error: "با این شماره قبلاً حساب ساخته شده؛ وارد حساب شو." }, { status: 409 });
     const passwordHash = await hashPassword(password);
     const rows = await sql`INSERT INTO users (phone, display_name, password_hash) VALUES (${phone}, ${displayName || null}, ${passwordHash}) RETURNING id, phone, display_name`;
     const user = rows[0] as { id: number; phone: string; display_name: string | null };
     const session = createUserSession(Number(user.id));
-    const response = NextResponse.json({ success: true, user });
+    const mobileClient = request.headers.get("x-client-app") === "se-sote-mobile";
+    const response = NextResponse.json({ success: true, user, ...(mobileClient ? { session_token: session.value } : {}) });
     setUserCookie(response, session.value, session.maxAge);
     return response;
   } catch (error) {
