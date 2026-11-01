@@ -7,7 +7,7 @@ const cats=["همه","املاک","خودرو","موبایل و دیجیتال",
 const money=(v?:number|string|null)=>!v||Number(v)===0?"توافقی":Number(v).toLocaleString("fa-IR")+" تومان";
 export default function HomeScreen(){
  const router=useRouter(),[items,setItems]=useState<Listing[]>([]),[query,setQuery]=useState(""),[city,setCity]=useState(""),[category,setCategory]=useState("همه"),[loading,setLoading]=useState(true),[error,setError]=useState("");
- const load=useCallback(async()=>{try{setError("");setItems(await getListings({q:query,city,category:category==="همه"?"":category}));}catch(e){setError(e instanceof Error?e.message:"اتصال برقرار نشد.");}finally{setLoading(false);}},[query,city,category]);
+ const load=useCallback(async()=>{try{setError("");setItems(await getListings({q:query,city,min_price:minPrice,max_price:maxPrice,category:category==="همه"?"":category}));}catch(e){setError(e instanceof Error?e.message:"اتصال برقرار نشد.");}finally{setLoading(false);}},[query,city,minPrice,maxPrice,category]);
  useEffect(()=>{void load();},[load]);
  return <SafeAreaView style={{flex:1,backgroundColor:C}}>
  <FlatList data={items} keyExtractor={x=>String(x.id)} numColumns={2} columnWrapperStyle={{gap:10,paddingHorizontal:14}} contentContainerStyle={{paddingBottom:18,gap:10}}
@@ -18,6 +18,7 @@ export default function HomeScreen(){
  <View><Text style={{color:"white",fontSize:27,fontWeight:"900",textAlign:"right"}}>سه‌سوته</Text><Text style={{color:"#F8D9C7",textAlign:"right",marginTop:4}}>هرچی می‌خوای، سه‌سوته!</Text></View></View>
  <TextInput value={query} onChangeText={setQuery} placeholder="چی می‌خوای پیدا کنی؟" placeholderTextColor="#888" textAlign="right" returnKeyType="search" style={{backgroundColor:"white",borderRadius:12,padding:13,marginTop:16}}/>
  <TextInput value={city} onChangeText={setCity} placeholder="فیلتر شهر، مثلاً تهران" placeholderTextColor="#888" textAlign="right" returnKeyType="search" style={{backgroundColor:"#FFFFFFE8",borderRadius:12,padding:11,marginTop:8}}/>
+ <View style={{flexDirection:"row",gap:8,marginTop:8}}><TextInput value={minPrice} onChangeText={setMinPrice} keyboardType="numeric" placeholder="حداقل قیمت" placeholderTextColor="#888" textAlign="right" style={{flex:1,backgroundColor:"#FFFFFFE8",borderRadius:12,padding:10,fontSize:12}}/><TextInput value={maxPrice} onChangeText={setMaxPrice} keyboardType="numeric" placeholder="حداکثر قیمت" placeholderTextColor="#888" textAlign="right" style={{flex:1,backgroundColor:"#FFFFFFE8",borderRadius:12,padding:10,fontSize:12}}/></View>
  </View>
  <Text style={{fontSize:17,fontWeight:"900",color:I,textAlign:"right",paddingHorizontal:18,marginTop:17,marginBottom:10}}>دسته‌بندی‌ها</Text>
  <FlatList horizontal inverted data={cats} keyExtractor={x=>x} showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingHorizontal:14,gap:7}} renderItem={({item})=><Pressable onPress={()=>setCategory(item)} style={{backgroundColor:category===item?O:"white",paddingHorizontal:13,paddingVertical:9,borderRadius:20,borderWidth:1,borderColor:category===item?O:"#EEE3D8"}}><Text style={{color:category===item?"white":I,fontWeight:"800",fontSize:12}}>{item}</Text></Pressable>}/>
