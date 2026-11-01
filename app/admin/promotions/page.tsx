@@ -42,7 +42,7 @@ export default function AdminPromotionsPage() {
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <Link href="/admin" style={{ color: "#16758A", fontWeight: 800, textDecoration: "none" }}>← بازگشت به پنل مدیریت</Link>
       <h1 style={{ fontSize: 27, margin: "18px 0 6px" }}>درخواست‌های ویژه‌سازی و نردبان</h1>
-      <p style={{ color: "#647579" }}>پس از تأیید، آگهی ویژه یا به ابتدای فهرست منتقل می‌شود.</p>
+      <p style={{ color: "#647579" }}>پس از تأیید، آگهی ویژه به مدت ۷ روز فعال می‌شود یا آگهی با نردبان به ابتدای فهرست منتقل می‌شود.</p>
       {message && <div role="status" style={{ ...panel, margin: "14px 0" }}>{message}</div>}
       <button onClick={() => void load()} disabled={loading} style={{ ...btn("#18343C"), marginBottom: 15 }}>بروزرسانی</button>
       {loading ? <p>در حال دریافت...</p> : items.length === 0 ? <div style={panel}>درخواست در انتظار بررسی وجود ندارد.</div> :
