@@ -26,11 +26,6 @@
         "backgroundColor": "#FFF8EF"
       }
     },
-    "extra": {
-      "eas": {
-        "projectId": ""
-      }
-    },
     "ios": {
       "bundleIdentifier": "ir.sesote.app",
       "supportsTablet": false,
