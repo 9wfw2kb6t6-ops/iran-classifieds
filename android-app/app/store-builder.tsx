@@ -4,7 +4,18 @@ import { useRouter } from "expo-router";
 import { getAccount } from "../lib/api";
 import { createStoreBuilderRequest,getStoreMessages,reviewStoreRequest,sendStoreMessage,StoreBuilderRequest,StoreMessage } from "../lib/store-builder-api";
 const O="#F47735",I="#18343C";
-const plans={inside:[{id:"basic",name:"فروشگاه عادی",price:"۴ میلیون تومان"},{id:"pro",name:"فروشگاه حرفه‌ای",price:"۸ میلیون تومان"},{id:"custom",name:"فروشگاه اختصاصی",price:"از ۱۵ میلیون تومان"}],independent:[{id:"basic",name:"سایت فروشگاهی پایه",price:"۸ میلیون تومان"},{id:"pro",name:"سایت فروشگاهی حرفه‌ای",price:"۱۵ میلیون تومان"},{id:"custom",name:"سایت فروشگاهی اختصاصی",price:"از ۲۵ میلیون تومان"}]};
+const plans={
+ inside:[
+  {id:"basic",name:"فروشگاه عادی",price:"۴ میلیون تومان",note:"شروع فروش در بازار سه‌سوته",features:["صفحه اختصاصی فروشگاه داخل سه‌سوته","دسته‌بندی و معرفی محصولات","اطلاعات تماس و ثبت سفارش","طراحی واکنش‌گرا برای موبایل"]},
+  {id:"pro",name:"فروشگاه حرفه‌ای",price:"۸ میلیون تومان",note:"برای کسب‌وکارهای در حال رشد",features:["تمام امکانات نسخه عادی","طراحی اختصاصی‌تر و چیدمان ویژه","پنل مدیریت محصولات و سفارش‌ها","گزارش سفارش‌ها و وضعیت آن‌ها"]},
+  {id:"custom",name:"فروشگاه اختصاصی",price:"از ۱۵ میلیون تومان",note:"متناسب با نیاز و برند شما",features:["طراحی متناسب با هویت برند","امکانات سفارشی طبق توافق","صفحه‌ها و قابلیت‌های اختصاصی","برآورد هزینه پیش از شروع پروژه"]}
+ ],
+ independent:[
+  {id:"basic",name:"سایت فروشگاهی پایه",price:"۸ میلیون تومان",note:"شروع حضور مستقل با برند خودتان",features:["طراحی سایت با هویت برند شما","صفحه اصلی و معرفی فروشگاه","صفحات محصول و اطلاعات تماس","نمایش واکنش‌گرا در موبایل"]},
+  {id:"pro",name:"سایت فروشگاهی حرفه‌ای",price:"۱۵ میلیون تومان",note:"برای فروشگاه‌های در حال توسعه",features:["تمام امکانات نسخه پایه","طراحی اختصاصی‌تر صفحات","مدیریت محصولات و سفارش‌ها","اتصال دامنه اختصاصی و تنظیمات اولیه"]},
+  {id:"custom",name:"سایت فروشگاهی اختصاصی",price:"از ۲۵ میلیون تومان",note:"راهکار اختصاصی متناسب با کسب‌وکار",features:["طراحی اختصاصی بر اساس برند","امکانات و بخش‌های سفارشی","قابلیت توسعه متناسب با نیاز","برآورد فنی و مالی پیش از شروع"]}
+ ]
+};
 const status:Record<string,string>={pending:"در انتظار بررسی",quoted:"اعلام قیمت",awaiting_prepayment:"در انتظار پیش‌پرداخت",prepayment_pending:"در انتظار تأیید پیش‌پرداخت",customer_review:"در انتظار تأیید طرح",building:"در حال ساخت",revision:"در حال اصلاح",delivery_review:"در انتظار تأیید تحویل",delivered:"تحویل‌شده",cancelled:"لغوشده"};
 const money=(n:number|null)=>n?Number(n).toLocaleString("fa-IR")+" تومان":"اعلام نشده";
 export default function StoreBuilderScreen(){
@@ -18,6 +29,7 @@ export default function StoreBuilderScreen(){
  async function openMessages(id:number){setActive(id);setMessages([]);try{const d=await getStoreMessages(id);setMessages(d.messages);}catch(e){Alert.alert("پیام‌ها",e instanceof Error?e.message:"دریافت پیام‌ها ممکن نشد.");}}
  async function send(){if(!active||!message.trim())return;setMessageBusy(true);try{const d=await sendStoreMessage(active,message.trim());setMessages(v=>[...v,d.message]);setMessage("");}catch(e){Alert.alert("خطا",e instanceof Error?e.message:"ارسال پیام انجام نشد.");}finally{setMessageBusy(false);}}
  async function review(id:number,action:"approve"|"revision"|"approve_delivery"){try{await reviewStoreRequest(id,action,feedback);setFeedback("");Alert.alert("ثبت شد","پاسخ شما ثبت شد.");await load();}catch(e){Alert.alert("خطا",e instanceof Error?e.message:"ثبت پاسخ انجام نشد.");}}
+ const chosen=plans[kind].find(x=>x.id===plan)!;
  const field={backgroundColor:"white",borderWidth:1,borderColor:"#E9E2D9",borderRadius:12,padding:13,fontSize:14,color:I,marginTop:7} as const;
  return <SafeAreaView style={{flex:1,backgroundColor:"#FFF8EF"}}><ScrollView contentContainerStyle={{padding:18,paddingBottom:40}}>
  <Pressable onPress={()=>router.back()}><Text style={{textAlign:"right",color:O,fontWeight:"800"}}>← بازگشت</Text></Pressable>
@@ -28,6 +40,12 @@ export default function StoreBuilderScreen(){
  <View style={{flexDirection:"row",gap:8,marginTop:10}}>{[{id:"inside",label:"داخل سه‌سوته"},{id:"independent",label:"سایت مستقل"}].map(x=><Pressable key={x.id} onPress={()=>setKind(x.id as "inside"|"independent")} style={{flex:1,backgroundColor:kind===x.id?O:"#F4EEE7",padding:12,borderRadius:11}}><Text style={{textAlign:"center",color:kind===x.id?"white":I,fontWeight:"800",fontSize:12}}>{x.label}</Text></Pressable>)}</View>
  <Text style={{textAlign:"right",fontWeight:"900",color:I,marginTop:17}}>انتخاب طرح</Text>
  {plans[kind].map(p=><Pressable key={p.id} onPress={()=>setPlan(p.id as "basic"|"pro"|"custom")} style={{borderWidth:1,borderColor:plan===p.id?O:"#EEE3D8",backgroundColor:plan===p.id?"#FFF4EB":"white",borderRadius:11,padding:12,marginTop:8,flexDirection:"row",justifyContent:"space-between"}}><Text style={{fontSize:12,color:O,fontWeight:"800"}}>{p.price}</Text><Text style={{fontSize:12,color:I,fontWeight:"800"}}>{p.name} {plan===p.id?"✓":""}</Text></Pressable>)}
+ <View style={{backgroundColor:"#FFF8EF",borderRadius:12,padding:13,marginTop:11}}>
+  <Text style={{textAlign:"right",fontWeight:"900",color:I}}>{chosen.name} · {chosen.price}</Text>
+  <Text style={{textAlign:"right",fontSize:11,color:"#777",marginTop:4}}>{chosen.note}</Text>
+  {chosen.features.map((feature,index)=><Text key={index} style={{textAlign:"right",fontSize:12,color:I,marginTop:7}}>✓ {feature}</Text>)}
+ </View>
+ <Text style={{textAlign:"right",fontSize:11,color:"#777",lineHeight:21,marginTop:10}}>هزینه ساخت یک‌باره است؛ قیمت نهایی پس از بررسی نیازها اعلام می‌شود. ثبت درخواست رایگان است و فعلاً پرداخت آنلاین فعال نیست.</Text>
  <Text style={{textAlign:"right",fontWeight:"800",color:I,marginTop:16}}>نام کسب‌وکار</Text><TextInput value={business} onChangeText={setBusiness} placeholder="نام فروشگاه یا کسب‌وکار" placeholderTextColor="#999" textAlign="right" style={field}/>
  <Text style={{textAlign:"right",fontWeight:"800",color:I,marginTop:13}}>شماره تماس</Text><TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="09123456789" placeholderTextColor="#999" textAlign="left" style={field}/>
  <Text style={{textAlign:"right",fontWeight:"800",color:I,marginTop:13}}>توضیحات</Text><TextInput value={description} onChangeText={setDescription} multiline textAlignVertical="top" placeholder="نیازها و امکانات موردنظرت را بنویس..." placeholderTextColor="#999" style={[field,{minHeight:90}]}/>
