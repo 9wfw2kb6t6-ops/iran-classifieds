@@ -15,14 +15,17 @@ export async function POST(request: NextRequest) {
     const phone = normalizePhone(String(body.phone || ""));
     const password = String(body.password || "");
     if (!/^09\d{9}$/.test(phone) || !password) return NextResponse.json({ error: "شماره موبایل یا رمز عبور صحیح نیست." }, { status: 400 });
-    const sql = neon(process.env.DATABASE_URL!);
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) return NextResponse.json({ error: "پایگاه داده در دسترس نیست." }, { status: 503 });
+    const sql = neon(databaseUrl);
     const rows = await sql`SELECT id, phone, display_name, password_hash FROM users WHERE phone = ${phone} LIMIT 1`;
     if (!rows.length || !rows[0].password_hash || !(await verifyPassword(password, String(rows[0].password_hash)))) {
       return NextResponse.json({ error: "شماره موبایل یا رمز عبور اشتباه است." }, { status: 401 });
     }
     const user = { id: Number(rows[0].id), phone: rows[0].phone, display_name: rows[0].display_name };
     const session = createUserSession(user.id);
-    const response = NextResponse.json({ success: true, user });
+    const mobileClient = request.headers.get("x-client-app") === "se-sote-mobile";
+    const response = NextResponse.json({ success: true, user, ...(mobileClient ? { session_token: session.value } : {}) });
     setUserCookie(response, session.value, session.maxAge);
     return response;
   } catch (error) {
