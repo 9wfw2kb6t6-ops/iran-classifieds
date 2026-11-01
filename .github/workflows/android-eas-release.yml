@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       build_profile:
-        description: EAS build profile
+        description: Android installable APK (choose this for direct phone installation)
         required: true
+        default: production-apk
         type: choice
         options:
           - production-apk
@@ -28,6 +29,14 @@ jobs:
       - name: Install dependencies
         working-directory: android-app
         run: npm install
+
+      - name: Align Expo SDK dependencies
+        working-directory: android-app
+        run: npx expo install --fix
+
+      - name: Verify project dependencies
+        working-directory: android-app
+        run: npx expo-doctor@latest
 
       - name: Build signed Android app with EAS
         working-directory: android-app
