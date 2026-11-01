@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "sesote",
+    "extra": {
+      "eas": {
+        "projectId": "e3e80dad-d298-4191-b5fd-2e038822092a"
+      }
+    },
     "plugins": [
       "expo-router",
       "expo-secure-store",
