@@ -14,7 +14,7 @@ export default function HomeScreen(){
  ListHeaderComponent={<>
  <View style={{backgroundColor:I,padding:19,paddingTop:22,borderBottomLeftRadius:24,borderBottomRightRadius:24}}>
  <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between"}}>
- <Pressable onPress={()=>router.push("/account")} style={{backgroundColor:"#FFFFFF20",padding:10,borderRadius:10}}><Text style={{color:"white",fontWeight:"800"}}>حساب من</Text></Pressable>
+ <View style={{flexDirection:"row",gap:7}}><Pressable onPress={()=>router.push("/admin")} style={{backgroundColor:"#FFFFFF20",padding:10,borderRadius:10}}><Text style={{color:"white",fontWeight:"800"}}>مدیریت</Text></Pressable><Pressable onPress={()=>router.push("/account")} style={{backgroundColor:"#FFFFFF20",padding:10,borderRadius:10}}><Text style={{color:"white",fontWeight:"800"}}>حساب من</Text></Pressable></View>
  <View><Text style={{color:"white",fontSize:27,fontWeight:"900",textAlign:"right"}}>سه‌سوته</Text><Text style={{color:"#F8D9C7",textAlign:"right",marginTop:4}}>هرچی می‌خوای، سه‌سوته!</Text></View></View>
  <TextInput value={query} onChangeText={setQuery} placeholder="چی می‌خوای پیدا کنی؟" placeholderTextColor="#888" textAlign="right" returnKeyType="search" style={{backgroundColor:"white",borderRadius:12,padding:13,marginTop:16}}/>
  <TextInput value={city} onChangeText={setCity} placeholder="فیلتر شهر، مثلاً تهران" placeholderTextColor="#888" textAlign="right" returnKeyType="search" style={{backgroundColor:"#FFFFFFE8",borderRadius:12,padding:11,marginTop:8}}/>
