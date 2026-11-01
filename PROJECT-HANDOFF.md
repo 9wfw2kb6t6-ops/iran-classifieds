@@ -242,3 +242,12 @@ https://github.com/9wfw2kb6t6-ops/iran-classifieds
 - مقدار آن به شاخه Neon آزمایشی `br-twilight-thunder-ba1yw5i0` اشاره می‌کند؛ مقدار secret در گزارش یا مخزن درج نشده است.
 - متغیر Production `DATABASE_URL` تغییر نکرد.
 - Preview هنوز ساخته نشده بود و پس از این commit باید وضعیت deployment بررسی شود.
+
+
+#### نتیجه Preview و smoke test
+- Deployment شاخه `wallet-test` با شناسه `dpl_4k1DqsYgf2K3z4zbJLK5RDxqRdBb` به وضعیت READY رسید.
+- URL: `https://iran-classifieds-llp6zphiz-nariman-alizadeh-s-projects.vercel.app`
+- صفحه اصلی با HTTP 200 پاسخ داد.
+- `GET /api/listings` با HTTP 200 پاسخ داد و داده‌های شاخه آزمایشی را برگرداند؛ آگهی تست با شناسه 9 در خروجی دیده شد. این موضوع تأیید می‌کند Preview به شاخه آزمایشی Neon وصل است، نه Production.
+- بررسی endpointهای حساب از مسیر fetch خودکار به دلیل احراز هویت Vercel Preview متوقف شد؛ بنابراین نشست کاربر، endpoint کیف پول و ثبت درخواست ارتقا هنوز از UI تست نشده‌اند.
+- درگاه پرداخت واقعی وصل نیست؛ هیچ شارژ یا پرداخت واقعی انجام نشده است.
