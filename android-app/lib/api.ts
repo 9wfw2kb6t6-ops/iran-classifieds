@@ -2,7 +2,7 @@ import * as SecureStore from "expo-secure-store";
 
 export const API_BASE_URL = "https://iran-classifieds.vercel.app";
 const TOKEN_KEY = "se_sote_session";
-const englishDigits=(value:string)=>value.replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[٬,\\s]/g,"");
+const englishDigits=(value:string)=>value.replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[٬,\s]/g,"");
 export type Listing = {
   id: number | string; title: string; description?: string;
   price_toman?: number | string | null; city?: string; category?: string;
