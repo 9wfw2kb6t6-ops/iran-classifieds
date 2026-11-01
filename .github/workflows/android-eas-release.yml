@@ -6,9 +6,10 @@ on:
       build_profile:
         description: Android installable APK (choose this for direct phone installation)
         required: true
-        default: production-apk
+        default: preview
         type: choice
         options:
+          - preview
           - production-apk
           - production
 
