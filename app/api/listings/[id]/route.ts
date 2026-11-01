@@ -14,7 +14,8 @@ export async function GET(_request: Request, { params }: Context) {
     if (!url) return NextResponse.json({ error: "پایگاه داده در دسترس نیست." }, { status: 503 });
     const sql = neon(url);
     const rows = await sql`
-      SELECT id, title, description, price_toman, city, category, contact_phone, image_urls, created_at, is_featured
+      SELECT id, title, description, price_toman, city, category, contact_phone, image_urls, created_at,
+             (is_featured AND featured_until > NOW()) AS is_featured, featured_until
       FROM listings
       WHERE id = ${Number(id)} AND status = 'published'
       LIMIT 1
