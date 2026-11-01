@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { Store, ShoppingBag, Palette, Globe2, CheckCircle2, ArrowLeft, Sparkles } from "lucide-react";
 
@@ -18,6 +18,11 @@ const planCatalog = {
   ]
 };
 
+type StoreRequest = { id:number; business_name:string; store_model:string; plan_code:string; status:string; quoted_price_toman:number|null; prepayment_amount_toman:number|null; admin_note:string|null; deliverable_url:string|null; requested_at:string };
+type StoreMessage = { id:number; sender_role:"user"|"admin"; body:string; created_at:string };
+const requestStatus:Record<string,string>={pending:"در انتظار بررسی",contacted:"تماس گرفته شد",quoted:"اعلام قیمت",awaiting_deposit:"در انتظار پیش‌پرداخت",deposit_confirmed:"پیش‌پرداخت تأیید شد",paid:"تسویه شد",building:"در حال ساخت",customer_review:"در انتظار تأیید طرح",revision:"در حال اصلاح",delivery_review:"در انتظار تأیید تحویل",delivered:"تحویل‌شده",rejected:"ردشده"};
+const money=(value:number|null)=>value?Number(value).toLocaleString("fa-IR")+" تومان":"اعلام نشده";
+
 export default function StoreBuilderPage() {
   const [selected, setSelected] = useState<"basic" | "pro" | "custom">("basic");
   const [kind, setKind] = useState<"inside" | "independent">("inside");
@@ -26,8 +31,68 @@ export default function StoreBuilderPage() {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState("");
   const [description, setDescription] = useState("");
+  const [requests, setRequests] = useState<StoreRequest[]>([]);
+  const [requestError, setRequestError] = useState("");
+  const [activeRequest, setActiveRequest] = useState<number | null>(null);
+  const [messages, setMessages] = useState<StoreMessage[]>([]);
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messageBusy, setMessageBusy] = useState(false);
+  const [feedback, setFeedback] = useState<Record<number,string>>({});
   const plans = planCatalog[kind];
   const chosen = plans.find(p => p.id === selected)!;
+
+  async function loadRequests() {
+    try {
+      const response = await fetch("/api/account/me", { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "دریافت درخواست‌ها انجام نشد.");
+      setRequests(Array.isArray(data.store_builder_requests) ? data.store_builder_requests : []);
+      setRequestError(data.user ? "" : "برای پیگیری درخواست‌ها ابتدا وارد حساب کاربری شو.");
+    } catch (error) {
+      setRequestError(error instanceof Error ? error.message : "دریافت درخواست‌ها انجام نشد.");
+    }
+  }
+  useEffect(() => { void loadRequests(); }, []);
+
+  async function openMessages(requestId:number) {
+    setActiveRequest(requestId);
+    setMessages([]);
+    try {
+      const response = await fetch("/api/account/store-builder-messages?request_id=" + requestId, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "دریافت پیام‌ها انجام نشد.");
+      setMessages(data.messages || []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "دریافت پیام‌ها انجام نشد.");
+    }
+  }
+
+  async function sendMessage() {
+    if (!activeRequest || !messageDraft.trim()) return;
+    setMessageBusy(true);
+    try {
+      const response = await fetch("/api/account/store-builder-messages", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({request_id:activeRequest,body:messageDraft.trim()}) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "ارسال پیام انجام نشد.");
+      setMessages(current => [...current, data.message]);
+      setMessageDraft("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "ارسال پیام انجام نشد.");
+    } finally { setMessageBusy(false); }
+  }
+
+  async function reviewRequest(requestId:number, action:"approve"|"revision"|"approve_delivery") {
+    const note = feedback[requestId] || "";
+    if (action === "revision" && note.trim().length < 5) { setMessage("برای درخواست اصلاح، حداقل ۵ نویسه توضیح بنویس."); return; }
+    try {
+      const response = await fetch("/api/account/store-builder-review", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({request_id:requestId,action,feedback:note}) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "ثبت پاسخ انجام نشد.");
+      setMessage(action === "revision" ? "درخواست اصلاح ثبت شد." : "تأیید شما ثبت شد.");
+      setFeedback(current => ({...current,[requestId]:""}));
+      await loadRequests();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "ثبت پاسخ انجام نشد."); }
+  }
 
   async function submitRequest() {
     if (!business.trim()) {
@@ -61,6 +126,7 @@ export default function StoreBuilderPage() {
       setBusiness("");
       setPhone("");
       setDescription("");
+      await loadRequests();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "ارتباط برقرار نشد؛ دوباره تلاش کن.");
     } finally {
@@ -109,6 +175,18 @@ export default function StoreBuilderPage() {
 
     <section className="container pb-16"><div className="mx-auto max-w-3xl rounded-3xl bg-white p-6 shadow-sm ring-1 ring-[#eee3d7] md:p-9"><div className="flex items-center gap-3"><div className="rounded-2xl bg-[#fff1e7] p-3 text-[#e66d2d]"><Store size={24}/></div><div><h2 className="text-xl font-black text-[#18343c]">درخواست ساخت فروشگاه</h2><p className="mt-1 text-xs text-[#829094]">اطلاعات اولیه را وارد کن تا درخواستت آماده شود.</p></div></div>
       <div className="mt-6 grid gap-4"><label className="text-sm font-bold text-[#526268]">نام کسب‌وکار<input value={business} onChange={e=>setBusiness(e.target.value)} placeholder="مثلاً پوشاک بهار" className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><label className="text-sm font-bold text-[#526268]">شماره موبایل تماس<input value={phone} onChange={e=>setPhone(e.target.value)} inputMode="numeric" placeholder="09123456789" className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><label className="text-sm font-bold text-[#526268]">توضیح کوتاه درباره فروشگاه<textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="چه محصولاتی می‌فروشی و چه امکاناتی نیاز داری؟" rows={4} className="mt-2 w-full rounded-xl border border-[#e8e0d7] bg-[#fffdf9] px-4 py-3 text-sm outline-none focus:border-[#f47735]"/></label><div className="rounded-2xl bg-[#fff8ef] p-4 text-sm leading-7 text-[#526268]">انتخاب فعلی: <b>{chosen.name}</b> · {kind==="inside" ? "فروشگاه داخل سه‌سوته" : "سایت مستقل"} · <b>{chosen.price}</b><p className="mt-1 text-xs text-[#829094]">ثبت درخواست رایگان است؛ پس از بررسی، قیمت نهایی و مراحل پرداخت به شما اعلام می‌شود. فعلاً پرداخت آنلاین فعال نیست.</p></div><button onClick={submitRequest} disabled={sending} className="rounded-xl bg-[#f47735] px-5 py-3.5 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-40">{sending ? "در حال ثبت..." : "ثبت درخواست فروشگاه"} <ArrowLeft className="mr-2 inline" size={16}/></button>{message && <p role="status" aria-live="polite" className="rounded-xl bg-[#fff8ef] px-4 py-3 text-sm leading-7 text-[#18343c]">{message}{message.includes("وارد حساب") && <> <Link className="font-black text-[#d85f24] underline" href="/account">ورود به حساب کاربری</Link></>}</p>}</div>
+    </div></section>
+    <section className="container pb-16"><div className="mx-auto max-w-4xl"><div className="mb-6"><h2 className="text-2xl font-black text-[#18343c]">پیگیری درخواست‌های من</h2><p className="mt-2 text-sm text-[#68777b]">وضعیت، قیمت پیشنهادی، پیام‌ها و لینک تحویل را از همین‌جا دنبال کن.</p></div>
+      {requestError && <p className="mb-4 rounded-xl bg-white p-4 text-sm leading-7 text-[#68777b]">{requestError}{requestError.includes("وارد حساب") && <> <Link className="font-black text-[#d85f24] underline" href="/account">ورود به حساب</Link></>}</p>}
+      {requests.length ? <div className="space-y-4">{requests.map(r=><article key={r.id} className="rounded-3xl border border-[#eee3d7] bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-black text-[#18343c]">{r.business_name}</h3><p className="mt-1 text-xs text-[#829094]">{r.store_model==="inside"?"فروشگاه داخل سه‌سوته":"سایت مستقل"} · {r.plan_code==="basic"?"پایه":r.plan_code==="pro"?"حرفه‌ای":"اختصاصی"}</p></div><span className="rounded-full bg-[#fff1e7] px-3 py-2 text-xs font-black text-[#d85f24]">{requestStatus[r.status]||r.status}</span></div>
+        <div className="mt-4 grid gap-3 rounded-2xl bg-[#fff8ef] p-4 text-sm sm:grid-cols-2"><p>قیمت اعلام‌شده: <b>{money(r.quoted_price_toman)}</b></p><p>پیش‌پرداخت: <b>{money(r.prepayment_amount_toman)}</b></p></div>
+        {r.admin_note && <p className="mt-3 rounded-xl bg-gray-50 p-3 text-sm leading-7 text-[#526268]">یادداشت تیم سه‌سوته: {r.admin_note}</p>}
+        {r.deliverable_url && <a href={r.deliverable_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm font-bold text-[#d85f24] underline">مشاهده لینک تحویل</a>}
+        <button onClick={()=>void openMessages(r.id)} className="mt-4 rounded-xl border border-[#eee3d7] px-4 py-2.5 text-sm font-black text-[#18343c]">گفت‌وگو با تیم سه‌سوته</button>
+        {activeRequest===r.id && <div className="mt-4 rounded-2xl bg-[#fff8ef] p-4"><div className="max-h-64 space-y-2 overflow-y-auto">{messages.map(m=><div key={m.id} className={m.sender_role==="user"?"ml-auto max-w-[85%] rounded-xl bg-[#e7f1f2] p-3 text-sm":"mr-auto max-w-[85%] rounded-xl bg-white p-3 text-sm"}>{m.body}</div>)}</div><div className="mt-3 flex gap-2"><button disabled={messageBusy||!messageDraft.trim()} onClick={()=>void sendMessage()} className="rounded-xl bg-[#f47735] px-4 py-2 text-sm font-black text-white disabled:opacity-50">{messageBusy?"...":"ارسال"}</button><input value={messageDraft} onChange={e=>setMessageDraft(e.target.value)} placeholder="پیامت را بنویس..." className="min-w-0 flex-1 rounded-xl border border-[#e8e0d7] bg-white px-3 py-2 text-sm"/></div></div>}
+        {(r.status==="customer_review"||r.status==="delivery_review") && <div className="mt-4 rounded-2xl border border-[#eee3d7] p-4"><p className="text-sm font-black text-[#18343c]">{r.status==="customer_review"?"بررسی طرح اولیه":"بررسی نسخه تحویلی"}</p><textarea value={feedback[r.id]||""} onChange={e=>setFeedback(v=>({...v,[r.id]:e.target.value}))} placeholder="در صورت نیاز به اصلاح، توضیحت را بنویس..." rows={3} className="mt-3 w-full rounded-xl border border-[#e8e0d7] p-3 text-sm"/><div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>void reviewRequest(r.id,r.status==="customer_review"?"approve":"approve_delivery")} className="rounded-xl bg-[#16834a] px-4 py-2.5 text-sm font-black text-white">{r.status==="customer_review"?"تأیید طرح":"تأیید تحویل"}</button><button onClick={()=>void reviewRequest(r.id,"revision")} className="rounded-xl bg-[#fff1e7] px-4 py-2.5 text-sm font-black text-[#d85f24]">درخواست اصلاح</button></div></div>}
+      </article>)}</div> : !requestError && <div className="rounded-2xl bg-white p-8 text-center text-sm text-[#829094]">هنوز درخواست فروشگاهی ثبت نکرده‌ای.</div>}
     </div></section>
   </main><footer className="border-t border-[#eee6dd] bg-white py-7 text-center text-xs text-[#829094]">© سه‌سوته — فروشگاه‌ساز سه‌سوته</footer></>;
 }
